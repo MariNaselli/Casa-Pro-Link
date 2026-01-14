@@ -1,0 +1,24 @@
+from . import db
+
+class Propiedad(db.Model):
+    # Control Interno
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Comercial (Público)
+    titulo = db.Column(db.String(100), nullable=False)
+    operacion = db.Column(db.String(20))  # Venta o Alquiler
+    precio = db.Column(db.Integer)
+    expensas = db.Column(db.Integer)
+    ubicacion = db.Column(db.String(200))
+    descripcion = db.Column(db.Text)
+    
+    # Ficha Técnica
+    m2_totales = db.Column(db.Integer)
+    m2_cubiertos = db.Column(db.Integer)
+    dormitorios = db.Column(db.Integer)
+    banios = db.Column(db.Integer)
+    
+    # Datos Privados
+    propietario_nombre = db.Column(db.String(100))
+    propietario_tel = db.Column(db.String(50))
+    notas_internas = db.Column(db.Text)

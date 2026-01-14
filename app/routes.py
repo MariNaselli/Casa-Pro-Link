@@ -1,37 +1,5 @@
-from flask import Flask, render_template, request
-from flask_sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-# Configuración: le decimos dónde guardar el archivo de la base de datos
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///casaprolink.db'
-db = SQLAlchemy(app)
-
-class Propiedad(db.Model):
-    # Control Interno
-    id = db.Column(db.Integer, primary_key=True)
-    
-    # Comercial (Público)
-    titulo = db.Column(db.String(100), nullable=False)
-    operacion = db.Column(db.String(20))  # Venta o Alquiler
-    precio = db.Column(db.Integer)
-    expensas = db.Column(db.Integer)
-    ubicacion = db.Column(db.String(200))
-    descripcion = db.Column(db.Text)
-    
-    # Ficha Técnica
-    m2_totales = db.Column(db.Integer)
-    m2_cubiertos = db.Column(db.Integer)
-    dormitorios = db.Column(db.Integer)
-    banios = db.Column(db.Integer)
-    
-    # Datos Privados
-    propietario_nombre = db.Column(db.String(100))
-    propietario_tel = db.Column(db.String(50))
-    notas_internas = db.Column(db.Text)
-
-# Creamos la base de datos físicamente
-with app.app_context():
-    db.create_all()
+from flask import render_template, request, redirect, url_for, session, current_app as app
+from .models import Propiedad, db
 
 @app.route('/')
 def home():
@@ -79,10 +47,7 @@ def procesar():
 
 @app.route('/propiedad/<int:id>')
 def ficha(id):
-    # Buscamos la propiedad en la DB usando su ID único
+    # Buscamos la propiedad por su ID, si no existe tira error 404
     propiedad = Propiedad.query.get_or_404(id)
-    # Le pasamos los datos al nuevo archivo ficha.html
+    # Renderizamos el HTML de la ficha pasando la propiedad como 'p'
     return render_template('ficha.html', p=propiedad)
-
-if __name__ == '__main__':
-    app.run(debug=True)
