@@ -77,5 +77,12 @@ def procesar():
     # Por ahora, solo lo mostramos en pantalla para ver que funciona
     return f"<h1>¡Guardado!</h1><p>Propiedad: {titulo_recibido} en {ubicacion_recibida} cargada correctamente.</p><a href='/cargar'>Cargar otra</a>"
 
+@app.route('/propiedad/<int:id>')
+def ficha(id):
+    # Buscamos la propiedad en la DB usando su ID único
+    propiedad = Propiedad.query.get_or_404(id)
+    # Le pasamos los datos al nuevo archivo ficha.html
+    return render_template('ficha.html', p=propiedad)
+
 if __name__ == '__main__':
     app.run(debug=True)
