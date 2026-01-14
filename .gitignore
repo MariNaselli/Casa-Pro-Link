@@ -1,0 +1,21 @@
+# Entorno Virtual
+venv/
+ENV/
+env/
+
+# Archivos de Python (compilados)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Variables de entorno (donde irán contraseñas a futuro)
+.env
+.flaskenv
+
+# Base de datos (por ahora la ignoramos para no subir datos de prueba)
+*.sqlite3
+instance/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
