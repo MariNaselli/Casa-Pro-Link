@@ -35,7 +35,20 @@ with app.app_context():
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    # Obtenemos lo que el usuario escribió
+    query = request.args.get('q', '') # El '' es para que no sea None si está vacío
+    
+    # Si hay algo escrito (quitando espacios en blanco con strip)
+    if query.strip():
+        lista_propiedades = Propiedad.query.filter(
+            (Propiedad.titulo.contains(query)) | 
+            (Propiedad.ubicacion.contains(query))
+        ).all()
+    else:
+        # Si el buscador está vacío, traemos absolutamente todo
+        lista_propiedades = Propiedad.query.all()
+        
+    return render_template('index.html', propiedades=lista_propiedades, busqueda=query)
 
 @app.route('/cargar')
 def cargar():

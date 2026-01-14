@@ -3,23 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CasaProLink - Vista Previa</title>
+    <title>CasaProLink - Catálogo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card-img-top { height: 200px; object-fit: cover; }
+        body { background-color: #f8f9fa; }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-    <div class="container py-5 text-center">
-        <h1 class="display-4 text-primary">CasaProLink</h1>
-        <p class="lead">Bienvenido al futuro sistema de gestión de Casa.Pro.Inmuebles</p>
-        <hr>
-        <div class="card shadow-sm mx-auto" style="max-width: 500px;">
-            <div class="card-body">
-                <h5 class="card-title">Estado del Sistema</h5>
-                <p class="card-text text-success">✔ Servidor conectado correctamente.</p>
-                <p class="text-muted small">Próximo paso: Crear el formulario de carga de propiedades.</p>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5 shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">CasaProLink</a>
+            <a href="/cargar" class="btn btn-primary btn-sm">Nueva Propiedad</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-6">
+                <form action="/" method="GET" class="input-group shadow-sm">
+                    <input type="text" name="q" class="form-control" 
+                           placeholder="Buscar por título o ubicación..." 
+                           value="{{ busqueda if busqueda else '' }}">
+                    <button class="btn btn-dark" type="submit">Buscar</button>
+                    {% if busqueda %}
+                        <a href="/" class="btn btn-outline-secondary">Limpiar</a>
+                    {% endif %}
+                </form>
             </div>
         </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for p in propiedades %}
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="https://via.placeholder.com/400x250?text=Propiedad" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ p.titulo }}</h5>
+                        <p class="text-muted mb-2">{{ p.ubicacion }}</p>
+                        <h6 class="text-primary fw-bold">USD {{ p.precio }}</h6>
+                    </div>
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <div class="d-grid gap-2 d-md-flex justify-content-between">
+                            <a href="#" class="btn btn-sm btn-outline-primary">Ver Detalle</a>
+                            <a href="/eliminar/{{ p.id }}" class="btn btn-sm btn-outline-danger" 
+                               onclick="return confirm('¿Seguro quieres eliminar esta propiedad?')">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not propiedades %}
+        <div class="text-center mt-5">
+            <h4 class="text-muted">No encontramos lo que buscas...</h4>
+            <a href="/" class="btn btn-link">Ver todo el catálogo</a>
+        </div>
+        {% endif %}
     </div>
 
-</body>
-</html>
+    <script src="
