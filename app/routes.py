@@ -42,28 +42,37 @@ def home():
     return render_template('index.html', propiedades=lista_propiedades, busqueda=query)
 
 @app.route('/cargar')
+@app.route('/cargar', methods=['GET', 'POST'])
 def cargar():
-    return render_template('cargar.html')
+    # 1. Seguridad: Solo si está logueado
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
 
-@app.route('/procesar', methods=['POST'])
-def procesar():
-    titulo_recibido = request.form.get('titulo')
-    precio_recibido = request.form.get('precio')
-    ubicacion_recibida = request.form.get('ubicacion')
-    propietario_recibido = request.form.get('propietario')
-    
-    nueva_propiedad = Propiedad(
-        titulo=titulo_recibido, 
-        precio=precio_recibido,
-        ubicacion=ubicacion_recibida,
-        propietario_nombre=propietario_recibido
+    if request.method == 'POST':
+        # 2. Capturamos todos los datos (asegúrate que los 'name' coincidan con el HTML)
+        nueva_propiedad = Propiedad(
+            titulo=request.form.get('titulo'),
+            precio=request.form.get('precio'),
+            ubicacion=request.form.get('ubicacion'),
+            descripcion=request.form.get('descripcion'),
+            m2_totales=request.form.get('m2_totales'),
+            dormitorios=request.form.get('dormitorios'),
+            banios=request.form.get('banios'),
+            propietario_nombre=request.form.get('propietario_nombre'),
+            propietario_tel=request.form.get('propietario_tel'),
+            activo=True  # Para que aparezca en el home
         )
-    
-    db.session.add(nueva_propiedad)
-    db.session.commit()
-    
-    return f"<h1>¡Guardado!</h1><p>Propiedad: {titulo_recibido} en {ubicacion_recibida} cargada correctamente.</p><a href='/cargar'>Cargar otra</a>"
 
+        # 3. Guardamos en la base de datos
+        db.session.add(nueva_propiedad)
+        db.session.commit()
+
+        # 4. Avisamos y redirigimos al Home (ya no a una pantalla blanca)
+        flash('¡Propiedad creada con éxito!', 'success')
+        return redirect(url_for('home'))
+
+    # Si es GET, simplemente mostramos el formulario
+    return render_template('cargar.html')
 @app.route('/propiedad/<int:id>')
 def ficha(id):
     propiedad = Propiedad.query.get_or_404(id)
@@ -84,7 +93,7 @@ def editar(id):
         p.precio = request.form.get('precio')
         p.m2_totales = request.form.get('m2_totales')
         p.dormitorios = request.form.get('dormitorios')
-        p.banos = request.form.get('banos')
+        p.banios = request.form.get('banios')
         p.descripcion = request.form.get('descripcion')
         p.propietario_nombre = request.form.get('propietario_nombre')
         p.propietario_tel = request.form.get('propietario_tel')

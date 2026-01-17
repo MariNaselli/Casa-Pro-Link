@@ -1,39 +1,69 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cargar Propiedad - CasaProLink</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <div class="container py-5">
-        <h2 class="mb-4">Nueva Propiedad</h2>
-        <form action="/procesar" method="POST" class="card p-4 shadow-sm">
-            <div class="mb-3">
-                <label class="form-label">Título de la propiedad</label>
-                <input type="text" name="titulo" class="form-control" placeholder="Ej: Depto 2 ambientes con balcón">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Descripción</label>
-                <textarea class="form-control" rows="3"></textarea>
-            </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Precio (USD)</label>
-                    <input type="number" name="precio" class="form-control">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Ubicación</label>
-                    <input type="text" name="ubicacion" class="form-control">
-                </div>
-                <div class="mb-3 p-3 bg-warning-subtle border rounded">
-    <label class="form-label"><strong>Dato Privado:</strong> Nombre del Dueño</label>
-    <input type="text" name="propietario" class="form-control" placeholder="Solo para control interno">
-</div>
-            </div>
-            <button type="submit" class="btn btn-primary">Crear Ficha</button>
-        </form>
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 mb-5 pb-5">
+
+    <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-arrow-left fs-4 me-3" style="cursor: pointer;" onclick="window.history.back();" title="Volver"></i>
+        <h2 class="mb-0">Cargar Nueva Propiedad</h2>
     </div>
-</body>
-</html>
+
+    <form action="{{ url_for('cargar') }}" method="POST" class="card p-4 shadow-sm">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Título del Aviso</label>
+                <input type="text" name="titulo" class="form-control" placeholder="Ej: Casa 3 dorm. con quincho" required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Precio</label>
+                <input type="number" name="precio" class="form-control" placeholder="0">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Operación</label>
+                <select name="operacion" class="form-select">
+                    <option value="Venta">Venta</option>
+                    <option value="Alquiler">Alquiler</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ubicación</label>
+            <input type="text" name="ubicacion" class="form-control" placeholder="Barrio, Ciudad...">
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Dormitorios</label>
+                <input type="number" name="dormitorios" class="form-control">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Baños</label>
+                <input type="number" name="banios" class="form-control">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">M2 Totales</label>
+                <input type="number" name="m2_totales" class="form-control">
+            </div>
+        </div>
+
+        <div class="bg-light p-3 rounded mb-3">
+            <h5 class="mb-3">Datos Internos (Solo tú ves esto)</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Nombre Propietario</label>
+                    <input type="text" name="propietario_nombre" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Teléfono Propietario</label>
+                    <input type="text" name="propietario_tel" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-success px-4">Guardar Propiedad</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
