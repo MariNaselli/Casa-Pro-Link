@@ -22,3 +22,5 @@ class Propiedad(db.Model):
     propietario_nombre = db.Column(db.String(100))
     propietario_tel = db.Column(db.String(50))
     notas_internas = db.Column(db.Text)
+    
+    activo = db.Column(db.Boolean, default=True)

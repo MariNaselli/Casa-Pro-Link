@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, session, current_app as app
+from flask import flash, render_template, request, redirect, url_for, session, current_app as app
 from .models import Propiedad, db
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -24,19 +24,20 @@ def logout():
 
 @app.route('/')
 def home():
-    
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
     
     query = request.args.get('q', '') 
     
     if query.strip():
+        # Filtramos: que esté ACTIVA Y que coincida con la búsqueda
         lista_propiedades = Propiedad.query.filter(
-            (Propiedad.titulo.contains(query)) | 
-            (Propiedad.ubicacion.contains(query))
+            Propiedad.activo == True, # <--- Agregamos esta condición
+            (Propiedad.titulo.contains(query) | Propiedad.ubicacion.contains(query))
         ).all()
     else:
-        lista_propiedades = Propiedad.query.all()
+        # Si no hay búsqueda, traemos todas las que estén ACTIVA == True
+        lista_propiedades = Propiedad.query.filter_by(activo=True).all()
         
     return render_template('index.html', propiedades=lista_propiedades, busqueda=query)
 
@@ -73,25 +74,33 @@ def editar(id):
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
     
-    propiedad = Propiedad.query.get_or_404(id)
+    p = Propiedad.query.get_or_404(id)
+    origen = request.args.get('next', 'home')
     
     if request.method == 'POST':
-        propiedad.titulo = request.form.get('titulo')
-        propiedad.precio = request.form.get('precio')
-        propiedad.ubicacion = request.form.get('ubicacion')
-        propiedad.operacion = request.form.get('operacion')
-        propiedad.descripcion = request.form.get('descripcion')
-        propiedad.m2_totales = request.form.get('m2_totales')
-        propiedad.dormitorios = request.form.get('dormitorios')
-        propiedad.banios = request.form.get('banios')
+        # 1. CAPTURAR los datos del formulario (Asegurate de que estos nombres coincidan con el 'name' de tus inputs en el HTML)
+        p.titulo = request.form.get('titulo')
+        p.ubicacion = request.form.get('ubicacion')
+        p.precio = request.form.get('precio')
+        p.m2_totales = request.form.get('m2_totales')
+        p.dormitorios = request.form.get('dormitorios')
+        p.banos = request.form.get('banos')
+        p.descripcion = request.form.get('descripcion')
+        p.propietario_nombre = request.form.get('propietario_nombre')
+        p.propietario_tel = request.form.get('propietario_tel')
+
+        # 2. GUARDAR los cambios en la base de datos
+        db.session.commit()
         
-        propiedad.propietario_nombre = request.form.get('propietario_nombre')
-        propiedad.propietario_tel = request.form.get('propietario_tel')
+        # 3. AVISAR al usuario
+        flash('¡Propiedad actualizada con éxito!', 'success')
         
-        db.session.commit() 
-        return redirect(url_for('ficha', id=propiedad.id))
-    
-    return render_template('editar.html', p=propiedad)
+        # 4. REDIRIGIR según el origen
+        if origen == 'ficha':
+            return redirect(url_for('ficha', id=p.id))
+        return redirect(url_for('home'))
+        
+    return render_template('editar.html', p=p, origen=origen)
 
 @app.route('/eliminar/<int:id>')
 def eliminar(id):
@@ -99,6 +108,7 @@ def eliminar(id):
         return redirect(url_for('login'))
     
     p = Propiedad.query.get_or_404(id)
-    db.session.delete(p)
+    p.activo = False
     db.session.commit()
+    flash('La propiedad ha sido eliminada correctamente.', 'warning')
     return redirect(url_for('home'))

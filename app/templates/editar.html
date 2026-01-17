@@ -46,10 +46,15 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-between">
-            <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-success">Guardar Cambios</button>
-        </div>
+        <div class="d-flex justify-content-between mt-4">
+    {% if origen == 'ficha' %}
+        <a href="{{ url_for('ficha', id=p.id) }}" class="btn btn-secondary">Cancelar</a>
+    {% else %}
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancelar</a>
+    {% endif %}
+    
+    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+</div>
     </form>
 </div>
 {% endblock %}

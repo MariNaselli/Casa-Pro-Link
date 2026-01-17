@@ -1,41 +1,40 @@
-{% extends "base.html" %} {% block title %}Ficha Técnica - {{ p.titulo }}{%
-endblock %} {% block content %}
+{% extends "base.html" %} {% block title %}Ficha Técnica - {{ p.titulo }}{% endblock %} 
+
+{% block content %}
 <div class="container pb-5 mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        
-        <div>
-            {% if session.admin_logged_in %}
-                <a href="/" class="text-decoration-none text-muted">
-                    <i class="bi bi-arrow-left"></i> Volver al Panel
-                </a>
-            {% endif %}
-        </div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      {% if session.admin_logged_in %}
+      <a href="/" class="text-decoration-none text-muted">
+        <i class="bi bi-arrow-left"></i> Volver
+      </a>
+      {% endif %}
+    </div>
 
-   <div class="d-flex gap-2">
-    {% if session.admin_logged_in %}
-        <button onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')" class="btn btn-outline-success rounded-pill px-3">
-            <i class="bi bi-whatsapp"></i> Compartir
-        </button>
+    <div class="d-flex gap-2">
+      {% if session.admin_logged_in %}
 
-        <a href="{{ url_for('editar', id=p.id) }}" class="btn btn-outline-primary rounded-pill px-3">
-            <i class="bi bi-pencil"></i> Editar
-        </a>
-        <a href="{{ url_for('eliminar', id=p.id) }}" 
-           onclick="return confirm('¿Borrar definitivamente esta propiedad?')" 
-           class="btn btn-outline-danger rounded-pill px-3">
-            <i class="bi bi-trash"></i>
-        </a>
-    {% endif %}  </div>
+      <a href="{{ url_for('editar', id=p.id, next='ficha') }}" class="btn btn-outline-primary rounded-pill px-3">
+        <i class="bi bi-pencil"></i> Editar
+      </a>
+
+      <button type="button" class="btn btn-outline-danger rounded-pill px-3" 
+              data-bs-toggle="modal" 
+              data-bs-target="#modalEliminarFicha">
+        <i class="bi bi-trash"></i> Eliminar
+      </button>
+
+      <button onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')" class="btn btn-outline-success rounded-pill px-3">
+        <i class="bi bi-whatsapp"></i> Compartir
+      </button>
+      {% endif %}
+    </div>
   </div>
 
   <div class="row g-5">
     <div class="col-md-7">
       <div class="rounded-4 overflow-hidden shadow-sm">
-        <img
-          src="https://via.placeholder.com/800x500?text=Imagen+Propiedad"
-          class="img-fluid w-100"
-          alt="Foto"
-        />
+        <img src="https://via.placeholder.com/800x500?text=Imagen+Propiedad" class="img-fluid w-100" alt="Foto" />
       </div>
     </div>
 
@@ -73,22 +72,34 @@ endblock %} {% block content %}
 
       <div class="card bg-light border-0 rounded-4 p-4">
         <h5 class="fw-bold mb-3">Descripción</h5>
-        <p class="text-secondary mb-0" style="white-space: pre-wrap">
-          {{ p.descripcion }}
-        </p>
+        <p class="text-secondary mb-0" style="white-space: pre-wrap">{{ p.descripcion }}</p>
       </div>
 
       {% if session.admin_logged_in %}
       <div class="mt-4 p-3 border-start border-4 border-warning bg-light">
         <h6 class="fw-bold text-warning-dark">INFO INTERNA</h6>
-        <p class="mb-1 small">
-          <strong>Propietario:</strong> {{ p.propietario_nombre }}
-        </p>
-        <p class="mb-0 small">
-          <strong>Teléfono:</strong> {{ p.propietario_tel }}
-        </p>
+        <p class="mb-1 small"><strong>Propietario:</strong> {{ p.propietario_nombre }}</p>
+        <p class="mb-0 small"><strong>Teléfono:</strong> {{ p.propietario_tel }}</p>
       </div>
       {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalEliminarFicha" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <p class="mb-0 text-muted">¿Estás seguro que deseas eliminar esta propiedad?</p>
+      </div>
+      <div class="modal-footer border-0 justify-content-between">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a href="{{ url_for('eliminar', id=p.id) }}" class="btn btn-danger px-4">Sí, eliminar</a>
+      </div>
     </div>
   </div>
 </div>
@@ -96,13 +107,7 @@ endblock %} {% block content %}
 <script>
   function compartirWhatsApp(titulo, id) {
     const urlFicha = window.location.origin + "/propiedad/" + id;
-    const texto =
-      "¡Hola! Te comparto la ficha de esta propiedad:\n\n" +
-      "🏠 *" +
-      titulo +
-      "*\n" +
-      "🔗 Ver detalles aquí: " +
-      urlFicha;
+    const texto = "¡Hola! Te comparto la ficha de esta propiedad:\n\n" + "🏠 *" + titulo + "*\n" + "🔗 Ver detalles aquí: " + urlFicha;
     const urlFinal = "https://wa.me/?text=" + encodeURIComponent(texto);
     window.open(urlFinal, "_blank");
   }
