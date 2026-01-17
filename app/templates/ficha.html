@@ -1,93 +1,110 @@
-{% extends "base.html" %}
-
-{% block title %}Ficha Técnica - {{ p.titulo }}{% endblock %}
-
-{% block content %}
-<div class="container pb-5">
+{% extends "base.html" %} {% block title %}Ficha Técnica - {{ p.titulo }}{%
+endblock %} {% block content %}
+<div class="container pb-5 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="/" class="text-decoration-none text-muted">
-            <i class="bi bi-arrow-left"></i> Volver
+        
+        <div>
+            {% if session.admin_logged_in %}
+                <a href="/" class="text-decoration-none text-muted">
+                    <i class="bi bi-arrow-left"></i> Volver al Panel
+                </a>
+            {% endif %}
+        </div>
+
+   <div class="d-flex gap-2">
+    {% if session.admin_logged_in %}
+        <button onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')" class="btn btn-outline-success rounded-pill px-3">
+            <i class="bi bi-whatsapp"></i> Compartir
+        </button>
+
+        <a href="{{ url_for('editar', id=p.id) }}" class="btn btn-outline-primary rounded-pill px-3">
+            <i class="bi bi-pencil"></i> Editar
         </a>
+        <a href="{{ url_for('eliminar', id=p.id) }}" 
+           onclick="return confirm('¿Borrar definitivamente esta propiedad?')" 
+           class="btn btn-outline-danger rounded-pill px-3">
+            <i class="bi bi-trash"></i>
+        </a>
+    {% endif %}  </div>
+  </div>
 
-        <div class="d-flex gap-2">
-            <button onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')" class="btn btn-outline-success rounded-pill px-3">
-                <i class="bi bi-whatsapp"></i> Compartir
-            </button>
-
-            {% if session.admin_logged_in %}
-                <a href="{{ url_for('editar', id=p.id) }}" class="btn btn-outline-primary rounded-pill px-3">
-                    <i class="bi bi-pencil"></i> Editar
-                </a>
-                <a href="{{ url_for('eliminar', id=p.id) }}" 
-                   onclick="return confirm('¿Borrar definitivamente esta propiedad?')" 
-                   class="btn btn-outline-danger rounded-pill px-3">
-                    <i class="bi bi-trash"></i>
-                </a>
-            {% endif %}
-        </div>
+  <div class="row g-5">
+    <div class="col-md-7">
+      <div class="rounded-4 overflow-hidden shadow-sm">
+        <img
+          src="https://via.placeholder.com/800x500?text=Imagen+Propiedad"
+          class="img-fluid w-100"
+          alt="Foto"
+        />
+      </div>
     </div>
 
-    <div class="row g-5">
-        <div class="col-md-7">
-            <div class="rounded-4 overflow-hidden shadow-sm">
-                <img src="https://via.placeholder.com/800x500?text=Imagen+Propiedad" class="img-fluid w-100" alt="Foto">
-            </div>
+    <div class="col-md-5">
+      <h1 class="fw-bold mb-3">{{ p.titulo }}</h1>
+      <p class="text-muted fs-5">
+        <i class="bi bi-geo-alt"></i> {{ p.ubicacion }}
+      </p>
+
+      <hr class="my-4" />
+
+      <div class="mb-4">
+        <span class="text-muted small d-block">PRECIO</span>
+        <h2 class="text-primary fw-bold">USD {{ p.precio }}</h2>
+      </div>
+
+      <div class="row row-cols-2 g-3 mb-4">
+        <div class="col border-start ps-3">
+          <span class="text-muted small d-block">Superficie</span>
+          <span class="fw-bold">{{ p.m2_totales }} m²</span>
         </div>
-
-        <div class="col-md-5">
-            <h1 class="fw-bold mb-3">{{ p.titulo }}</h1>
-            <p class="text-muted fs-5"><i class="bi bi-geo-alt"></i> {{ p.ubicacion }}</p>
-            
-            <hr class="my-4">
-
-            <div class="mb-4">
-                <span class="text-muted small d-block">PRECIO</span>
-                <h2 class="text-primary fw-bold">USD {{ p.precio }}</h2>
-            </div>
-
-            <div class="row row-cols-2 g-3 mb-4">
-                <div class="col border-start ps-3">
-                    <span class="text-muted small d-block">Superficie</span>
-                    <span class="fw-bold">{{ p.m2_totales }} m²</span>
-                </div>
-                <div class="col border-start ps-3">
-                    <span class="text-muted small d-block">Dormitorios</span>
-                    <span class="fw-bold">{{ p.dormitorios }}</span>
-                </div>
-                <div class="col border-start ps-3">
-                    <span class="text-muted small d-block">Baños</span>
-                    <span class="fw-bold">{{ p.banos }}</span>
-                </div>
-                <div class="col border-start ps-3">
-                    <span class="text-muted small d-block">Operación</span>
-                    <span class="fw-bold">Venta</span>
-                </div>
-            </div>
-
-            <div class="card bg-light border-0 rounded-4 p-4">
-                <h5 class="fw-bold mb-3">Descripción</h5>
-                <p class="text-secondary mb-0" style="white-space: pre-wrap;">{{ p.descripcion }}</p>
-            </div>
-            
-            {% if session.admin_logged_in %}
-            <div class="mt-4 p-3 border-start border-4 border-warning bg-light">
-                <h6 class="fw-bold text-warning-dark">INFO INTERNA</h6>
-                <p class="mb-1 small"><strong>Propietario:</strong> {{ p.propietario_nombre }}</p>
-                <p class="mb-0 small"><strong>Teléfono:</strong> {{ p.propietario_tel }}</p>
-            </div>
-            {% endif %}
+        <div class="col border-start ps-3">
+          <span class="text-muted small d-block">Dormitorios</span>
+          <span class="fw-bold">{{ p.dormitorios }}</span>
         </div>
+        <div class="col border-start ps-3">
+          <span class="text-muted small d-block">Baños</span>
+          <span class="fw-bold">{{ p.banos }}</span>
+        </div>
+        <div class="col border-start ps-3">
+          <span class="text-muted small d-block">Operación</span>
+          <span class="fw-bold">Venta</span>
+        </div>
+      </div>
+
+      <div class="card bg-light border-0 rounded-4 p-4">
+        <h5 class="fw-bold mb-3">Descripción</h5>
+        <p class="text-secondary mb-0" style="white-space: pre-wrap">
+          {{ p.descripcion }}
+        </p>
+      </div>
+
+      {% if session.admin_logged_in %}
+      <div class="mt-4 p-3 border-start border-4 border-warning bg-light">
+        <h6 class="fw-bold text-warning-dark">INFO INTERNA</h6>
+        <p class="mb-1 small">
+          <strong>Propietario:</strong> {{ p.propietario_nombre }}
+        </p>
+        <p class="mb-0 small">
+          <strong>Teléfono:</strong> {{ p.propietario_tel }}
+        </p>
+      </div>
+      {% endif %}
     </div>
+  </div>
 </div>
 
 <script>
-function compartirWhatsApp(titulo, id) {
-    const urlFicha = window.location.origin + '/propiedad/' + id;
-    const texto = "¡Hola! Te comparto la ficha de esta propiedad:\n\n" + 
-                  "🏠 *" + titulo + "*\n" +
-                  "🔗 Ver detalles aquí: " + urlFicha;
+  function compartirWhatsApp(titulo, id) {
+    const urlFicha = window.location.origin + "/propiedad/" + id;
+    const texto =
+      "¡Hola! Te comparto la ficha de esta propiedad:\n\n" +
+      "🏠 *" +
+      titulo +
+      "*\n" +
+      "🔗 Ver detalles aquí: " +
+      urlFicha;
     const urlFinal = "https://wa.me/?text=" + encodeURIComponent(texto);
-    window.open(urlFinal, '_blank');
-}
+    window.open(urlFinal, "_blank");
+  }
 </script>
 {% endblock %}

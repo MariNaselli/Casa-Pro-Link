@@ -43,11 +43,12 @@
                                        onclick="return confirm('¿Estás seguro de que querés borrar esta propiedad?')" title="Eliminar">
                                         <i class="bi bi-trash"></i>
                                     </a>
-                                {% endif %}
+                                
 
                                 <a href="#" class="link-success" title="Compartir vía WhatsApp" onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')">
                                     <i class="bi bi-whatsapp"></i>
                                 </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

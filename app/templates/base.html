@@ -12,12 +12,20 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5 shadow">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/">CasaProLink</a>
-            <a href="/cargar" class="btn btn-primary btn-sm">Nueva Propiedad</a>
+
+{# Solo mostramos la barra si está logueado Y NO es la página de login #}
+{% if session.admin_logged_in and request.endpoint != 'login' %}
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-primary" href="/">CasaProLink</a>
+        
+        <div class="ms-auto">
+            <a href="{{ url_for('cargar') }}" class="btn btn-primary btn-sm me-2">+ Nueva Propiedad</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Salir</a>
         </div>
-    </nav>
+    </div>
+</nav>
+{% endif %}
 
     <main>
         {% block content %}
