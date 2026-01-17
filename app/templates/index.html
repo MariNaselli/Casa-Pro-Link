@@ -1,57 +1,83 @@
 {% extends "base.html" %}
 
-{% block title %}Catálogo{% endblock %}
+{% block title %}Catálogo - Gestión Interna{% endblock %}
 
 {% block content %}
 <div class="container">
-   <div class="row justify-content-center my-5">
-    <div class="col-md-6">
-        <form action="/" method="GET" class="input-group input-group-md shadow-sm">
-            <input type="text" name="q" class="form-control border-0" placeholder="Buscar..." value="{{ busqueda if busqueda else '' }}">
-            <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
-            {% if busqueda %}
-                <a href="/" class="btn btn-outline-secondary border-0">Limpiar</a>
-            {% endif %}
-        </form>
+    <div class="row justify-content-center my-5">
+        <div class="col-md-6">
+            <form action="/" method="GET" class="input-group input-group-md shadow-sm">
+                <input type="text" name="q" class="form-control border-0" placeholder="Buscar por título o ubicación..." value="{{ busqueda if busqueda else '' }}">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                {% if busqueda %}
+                    <a href="/" class="btn btn-outline-secondary border-0">Limpiar</a>
+                {% endif %}
+            </form>
+        </div>
     </div>
-</div>
 
     <div class="container pb-5">
-    <div class="row row-cols-1 row-cols-md-4 g-4">
-        {% for p in propiedades %}
-        <div class="col">
-            <div class="card h-100 shadow-sm border-0">
-                <img src="https://via.placeholder.com/300x180" class="card-img-top" alt="...">
-                
-                <div class="card-body p-3">
-                    <h6 class="fw-bold mb-1 text-truncate">{{ p.titulo }}</h6>
-                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> {{ p.ubicacion }}</p>
-                    <h6 class="text-primary fw-bold mb-0">USD {{ p.precio }}</h6>
-                </div>
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            {% for p in propiedades %}
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="https://via.placeholder.com/300x180" class="card-img-top" alt="Imagen propiedad">
+                    
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold mb-1 text-truncate">{{ p.titulo }}</h6>
+                        <p class="text-muted small mb-2"><i class="bi bi-geo-alt"></i> {{ p.ubicacion }}</p>
+                        <h6 class="text-primary fw-bold mb-0">USD {{ p.precio }}</h6>
+                    </div>
 
-                <div class="card-footer bg-white border-0 p-3 pt-0">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <a href="/propiedad/{{ p.id }}" class="btn btn-sm btn-link p-0 text-decoration-none fw-bold">Ver detalle</a>
-                        
-                        <div class="d-flex gap-3">
-                            <a href="#" class="link-secondary" title="Editar"><i class="bi bi-pencil"></i></a>
-                            <a href="#" class="link-success" title="Compartir"><i class="bi bi-share"></i></a>
-                            <a href="/eliminar/{{ p.id }}" class="link-danger" 
-                               onclick="return confirm('¿Borrar?')" title="Eliminar"><i class="bi bi-trash"></i></a>
+                    <div class="card-footer bg-white border-0 p-3 pt-0">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <a href="{{ url_for('ficha', id=p.id) }}" class="btn btn-sm btn-link p-0 text-decoration-none fw-bold">Ver detalle</a>
+                            
+                            <div class="d-flex gap-3">
+                                {% if session.admin_logged_in %}
+                                    <a href="{{ url_for('editar', id=p.id) }}" class="link-secondary" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    
+                                    <a href="{{ url_for('eliminar', id=p.id) }}" class="link-danger" 
+                                       onclick="return confirm('¿Estás seguro de que querés borrar esta propiedad?')" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                {% endif %}
+
+                                <a href="#" class="link-success" title="Compartir vía WhatsApp" onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')">
+                                    <i class="bi bi-whatsapp"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
-</div>
 
     {% if not propiedades %}
     <div class="text-center mt-5">
-        <h4 class="text-muted">No encontramos lo que buscas...</h4>
-        <a href="/" class="btn btn-link">Ver todas las propiedades</a>
+        <h4 class="text-muted">No se encontraron propiedades...</h4>
+        <a href="/" class="btn btn-link">Ver todo el catálogo</a>
     </div>
     {% endif %}
 </div>
+
+
+
+<script>
+function compartirWhatsApp(titulo, id) {
+    const urlFicha = window.location.origin + '/propiedad/' + id;
+    
+    const texto = "¡Hola! Te comparto la ficha de esta propiedad:\n\n" + 
+                  "🏠 *" + titulo + "*\n" +
+                  "🔗 Ver detalles aquí: " + urlFicha;
+    
+    const urlFinal = "https://wa.me/?text=" + encodeURIComponent(texto);
+    window.open(urlFinal, '_blank');
+}
+</script>
+
 {% endblock %}

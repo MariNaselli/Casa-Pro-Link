@@ -4,10 +4,27 @@
 
 {% block content %}
 <div class="container pb-5">
-    <div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <a href="/" class="text-decoration-none text-muted">
-            <i class="bi bi-arrow-left"></i> Volver a propiedades
+            <i class="bi bi-arrow-left"></i> Volver
         </a>
+
+        <div class="d-flex gap-2">
+            <button onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')" class="btn btn-outline-success rounded-pill px-3">
+                <i class="bi bi-whatsapp"></i> Compartir
+            </button>
+
+            {% if session.admin_logged_in %}
+                <a href="{{ url_for('editar', id=p.id) }}" class="btn btn-outline-primary rounded-pill px-3">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+                <a href="{{ url_for('eliminar', id=p.id) }}" 
+                   onclick="return confirm('¿Borrar definitivamente esta propiedad?')" 
+                   class="btn btn-outline-danger rounded-pill px-3">
+                    <i class="bi bi-trash"></i>
+                </a>
+            {% endif %}
+        </div>
     </div>
 
     <div class="row g-5">
@@ -51,7 +68,26 @@
                 <h5 class="fw-bold mb-3">Descripción</h5>
                 <p class="text-secondary mb-0" style="white-space: pre-wrap;">{{ p.descripcion }}</p>
             </div>
+            
+            {% if session.admin_logged_in %}
+            <div class="mt-4 p-3 border-start border-4 border-warning bg-light">
+                <h6 class="fw-bold text-warning-dark">INFO INTERNA</h6>
+                <p class="mb-1 small"><strong>Propietario:</strong> {{ p.propietario_nombre }}</p>
+                <p class="mb-0 small"><strong>Teléfono:</strong> {{ p.propietario_tel }}</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<script>
+function compartirWhatsApp(titulo, id) {
+    const urlFicha = window.location.origin + '/propiedad/' + id;
+    const texto = "¡Hola! Te comparto la ficha de esta propiedad:\n\n" + 
+                  "🏠 *" + titulo + "*\n" +
+                  "🔗 Ver detalles aquí: " + urlFicha;
+    const urlFinal = "https://wa.me/?text=" + encodeURIComponent(texto);
+    window.open(urlFinal, '_blank');
+}
+</script>
 {% endblock %}

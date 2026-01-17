@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Editar Propiedad: {{ p.titulo }}</h2>
+    <form method="POST" class="card p-4 shadow-sm">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label>Título del Aviso</label>
+                <input type="text" name="titulo" class="form-control" value="{{ p.titulo }}" required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label>Precio</label>
+                <input type="number" name="precio" class="form-control" value="{{ p.precio }}">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label>Operación</label>
+                <select name="operacion" class="form-select">
+                    <option value="Venta" {% if p.operacion == 'Venta' %}selected{% endif %}>Venta</option>
+                    <option value="Alquiler" {% if p.operacion == 'Alquiler' %}selected{% endif %}>Alquiler</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label>Ubicación</label>
+            <input type="text" name="ubicacion" class="form-control" value="{{ p.ubicacion }}">
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3"><label>Dormitorios</label><input type="number" name="dormitorios" class="form-control" value="{{ p.dormitorios }}"></div>
+            <div class="col-md-4 mb-3"><label>Baños</label><input type="number" name="banios" class="form-control" value="{{ p.banios }}"></div>
+            <div class="col-md-4 mb-3"><label>M2 Totales</label><input type="number" name="m2_totales" class="form-control" value="{{ p.m2_totales }}"></div>
+        </div>
+
+        <div class="bg-light p-3 rounded mb-3">
+            <h5>Datos Internos (Solo tú ves esto)</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Nombre Propietario</label>
+                    <input type="text" name="propietario_nombre" class="form-control" value="{{ p.propietario_nombre }}">
+                </div>
+                <div class="col-md-6">
+                    <label>Teléfono Propietario</label>
+                    <input type="text" name="propietario_tel" class="form-control" value="{{ p.propietario_tel }}">
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-success">Guardar Cambios</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
