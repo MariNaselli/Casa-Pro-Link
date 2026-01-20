@@ -1,5 +1,8 @@
 from flask import flash, render_template, request, redirect, url_for, session, current_app as app
-from .models import Propiedad, db
+from .models import Propiedad, Multimedia, db # <--- Agregamos Multimedia
+import os
+import uuid # Para generar nombres de archivos únicos
+from werkzeug.utils import secure_filename
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -21,7 +24,6 @@ def logout():
     session.pop('admin_logged_in', None)
     return redirect(url_for('home'))
 
-
 @app.route('/')
 def home():
     if not session.get('admin_logged_in'):
@@ -41,42 +43,77 @@ def home():
         
     return render_template('index.html', propiedades=lista_propiedades, busqueda=query)
 
-@app.route('/cargar')
+
 @app.route('/cargar', methods=['GET', 'POST'])
 def cargar():
-    # 1. Seguridad: Solo si está logueado
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        # 2. Capturamos todos los datos (asegúrate que los 'name' coincidan con el HTML)
+        # 1. Creamos el objeto Propiedad
         nueva_propiedad = Propiedad(
             titulo=request.form.get('titulo'),
             precio=request.form.get('precio'),
-            calle = request.form.get('calle'),
-            altura = request.form.get('altura'),
-            barrio = request.form.get('barrio'),
+            calle=request.form.get('calle'),
+            altura=request.form.get('altura'),
+            barrio=request.form.get('barrio'),
             moneda=request.form.get('moneda'), 
             operacion=request.form.get('operacion'),
             descripcion=request.form.get('descripcion'),
             m2_totales=request.form.get('m2_totales'),
-            m2_cubiertos = request.form.get('m2_cubiertos'),
+            m2_cubiertos=request.form.get('m2_cubiertos'),
             dormitorios=request.form.get('dormitorios'),
             banios=request.form.get('banios'),
             propietario_nombre=request.form.get('propietario_nombre'),
             propietario_tel=request.form.get('propietario_tel'),
-            activo=True  # Para que aparezca en el home
+            activo=True 
         )
-
-        # 3. Guardamos en la base de datos
+        
         db.session.add(nueva_propiedad)
+        # IMPORTANTE: flush() genera el ID sin cerrar la sesión. 
+        # Si hacés commit() acá, a veces se rompe la conexión para los archivos.
+        db.session.flush() 
+
+        # 2. PROCESAR IMÁGENES (Bucle for para que NO se pisen)
+        imagenes = request.files.getlist('imagenes')
+        for file in imagenes:
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                # Nombre único con UUID para que no se pisen archivos iguales
+                nombre_unico = f"{uuid.uuid4().hex}_{filename}"
+                ruta = os.path.join(app.static_folder, 'uploads', nombre_unico)
+                file.save(ruta)
+                
+                # Creamos una entrada en Multimedia por CADA imagen
+                nuevo_m = Multimedia(
+                    archivo_nombre=nombre_unico,
+                    tipo='imagen',
+                    propiedad_id=nueva_propiedad.id
+                )
+                db.session.add(nuevo_m)
+
+        # 3. PROCESAR VIDEOS
+        videos = request.files.getlist('videos')
+        for video in videos:
+            if video and video.filename != '':
+                v_filename = secure_filename(video.filename)
+                v_nombre_unico = f"{uuid.uuid4().hex}_{v_filename}"
+                v_ruta = os.path.join(app.static_folder, 'uploads', v_nombre_unico)
+                video.save(v_ruta)
+                
+                nuevo_v = Multimedia(
+                    archivo_nombre=v_nombre_unico,
+                    tipo='video',
+                    propiedad_id=nueva_propiedad.id
+                )
+                db.session.add(nuevo_v)
+
+        # 4. COMMIT FINAL (Guarda la casa y todos sus archivos juntos)
         db.session.commit()
 
-        # 4. Avisamos y redirigimos al Home (ya no a una pantalla blanca)
-        flash('¡Propiedad creada con éxito!', 'success')
+        flash('Propiedad y archivos cargados con éxito', 'success')
         return redirect(url_for('home'))
 
-    # Si es GET, simplemente mostramos el formulario
     return render_template('cargar.html')
 @app.route('/propiedad/<int:id>')
 def ficha(id):

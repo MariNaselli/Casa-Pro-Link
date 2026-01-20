@@ -19,3 +19,6 @@ instance/
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
+
+app/static/uploads/*
+!app/static/uploads/default.jpg
