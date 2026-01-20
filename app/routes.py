@@ -126,38 +126,46 @@ def editar(id):
         return redirect(url_for('login'))
     
     p = Propiedad.query.get_or_404(id)
-    origen = request.args.get('next', 'home')
     
     if request.method == 'POST':
-        # 1. CAPTURAR los datos del formulario (Asegurate de que estos nombres coincidan con el 'name' de tus inputs en el HTML)
+        # Actualizar datos de texto (ya lo tenés)
         p.titulo = request.form.get('titulo')
-        p.calle = request.form.get('calle')
-        p.altura = request.form.get('altura')
-        p.barrio = request.form.get('barrio')
-        p.precio = request.form.get('precio')
-        p.moneda=request.form.get('moneda')
-        p.operacion=request.form.get('operacion')
-        p.m2_totales = request.form.get('m2_totales')
-        p.m2_cubiertos = request.form.get('m2_cubiertos')
-        p.dormitorios = request.form.get('dormitorios')
-        p.banios = request.form.get('banios')
-        p.descripcion = request.form.get('descripcion')
-        p.propietario_nombre = request.form.get('propietario_nombre')
-        p.propietario_tel = request.form.get('propietario_tel')
+        # ... todos los demás campos ...
 
-        # 2. GUARDAR los cambios en la base de datos
+        # Procesar NUEVAS imágenes (igual que en cargar)
+        nuevas_fotos = request.files.getlist('imagenes')
+        for file in nuevas_fotos:
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                nombre_unico = f"{uuid.uuid4().hex}_{filename}"
+                file.save(os.path.join(app.static_folder, 'uploads', nombre_unico))
+                
+                nuevo_m = Multimedia(archivo_nombre=nombre_unico, tipo='imagen', propiedad_id=p.id)
+                db.session.add(nuevo_m)
+
         db.session.commit()
+        flash('Propiedad actualizada', 'success')
+        return redirect(url_for('ficha', id=p.id))
         
-        # 3. AVISAR al usuario
-        flash('¡Propiedad actualizada con éxito!', 'success')
-        
-        # 4. REDIRIGIR según el origen
-        if origen == 'ficha':
-            return redirect(url_for('ficha', id=p.id))
-        return redirect(url_for('home'))
-        
-    return render_template('editar.html', p=p, origen=origen)
+    return render_template('editar.html', p=p)
 
+# RUTA NUEVA PARA BORRAR UNA FOTO SOLA
+@app.route('/borrar_archivo/<int:id>')
+def borrar_archivo(id):
+    archivo = Multimedia.query.get_or_404(id)
+    propiedad_id = archivo.propiedad_id
+    
+    # Borrar archivo físico
+    ruta = os.path.join(app.static_folder, 'uploads', archivo.archivo_nombre)
+    if os.path.exists(ruta):
+        os.remove(ruta)
+    
+    # Borrar de la base de datos
+    db.session.delete(archivo)
+    db.session.commit()
+    
+    flash('Archivo eliminado', 'info')
+    return redirect(url_for('editar', id=propiedad_id))
 @app.route('/eliminar/<int:id>')
 def eliminar(id):
     if not session.get('admin_logged_in'):

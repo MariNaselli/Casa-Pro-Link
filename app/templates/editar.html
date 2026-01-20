@@ -10,7 +10,7 @@
     <h2 class="mb-0">Editar Propiedad: {{ p.titulo }}</h2>
   </div>
 
-  <form method="POST" class="card p-4 shadow-sm border-0">
+  <form method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm border-0">
     <div class="row">
       <div class="col-md-6 mb-3">
         <label class="form-label fw-medium">Título</label>
@@ -138,6 +138,41 @@
       >
     </div>
 
+    <div class="mb-4">
+    <label class="form-label fw-bold">Imágenes Actuales</label>
+    <div class="d-flex flex-wrap gap-3 p-3 border rounded bg-light">
+        {% for archivo in p.archivos if archivo.tipo == 'imagen' %}
+        <div class="position-relative group">
+            <img src="{{ url_for('static', filename='uploads/' + archivo.archivo_nombre) }}" 
+                 class="rounded border shadow-sm" 
+                 style="width: 100px; height: 100px; object-fit: cover;">
+            <a href="{{ url_for('borrar_archivo', id=archivo.id) }}" 
+               class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 d-flex align-items-center justify-content-center" 
+               style="width: 24px; height: 24px;"
+               onclick="return confirm('¿Eliminar esta imagen permanentemente?')">
+                <i class="bi bi-trash fs-6"></i>
+            </a>
+            <div class="small text-muted text-truncate" style="max-width: 100px; font-size: 10px;">{{ archivo.archivo_nombre[-15:] }}</div>
+        </div>
+        {% else %}
+        <p class="text-muted small mb-0">No hay imágenes cargadas.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="mb-4">
+    <label class="form-label fw-bold text-primary">Subir más imágenes</label>
+    <div class="p-3 border-primary border-2 border-dashed rounded bg-light text-center mb-2" 
+         style="cursor: pointer; border-style: dashed !important;" 
+         onclick="document.getElementById('imagenesInput').click();">
+        <i class="bi bi-plus-circle fs-2 text-primary"></i>
+        <p class="small mb-0 text-primary">Haz clic para agregar nuevas fotos</p>
+    </div>
+    <input type="file" name="imagenes" id="imagenesInput" class="form-control d-none" accept="image/*" multiple onchange="previewImages(this)">
+    
+    <div id="lista-imagenes-nuevas" class="mt-2"></div>
+</div>
+
     <div class="bg-light p-3 rounded mb-3 border">
       <h5 class="mb-3">Datos Propietario/a</h5>
       <div class="row">
@@ -177,4 +212,52 @@
     </div>
   </form>
 </div>
+
+<script>
+    let contenedorFotos = new DataTransfer();
+    const inputFotos = document.getElementById('imagenesInput');
+    const vistaPrevia = document.getElementById('lista-imagenes-nuevas');
+
+    function previewImages(input) {
+        for (let file of input.files) {
+            contenedorFotos.items.add(file);
+        }
+        input.files = contenedorFotos.files;
+        vistaPrevia.innerHTML = "";
+        
+        if (input.files.length > 0) {
+            const grid = document.createElement('div');
+            grid.className = "d-flex flex-wrap gap-2 mt-2";
+            vistaPrevia.appendChild(grid);
+
+            Array.from(input.files).forEach((f, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = "position-relative d-flex flex-column align-items-center";
+                    div.innerHTML = `
+                        <div class="position-relative">
+                            <img src="${e.target.result}" class="rounded border border-primary shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+                            <button type="button" onclick="quitarFoto(${index})" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" style="width:20px; height:20px; font-size:12px;">×</button>
+                        </div>
+                        <span class="text-truncate mt-1" style="max-width: 80px; font-size: 10px;">${f.name}</span>
+                    `;
+                    grid.appendChild(div);
+                }
+                reader.readAsDataURL(f);
+            });
+        }
+    }
+
+    function quitarFoto(index) {
+        const nuevoContenedor = new DataTransfer();
+        const { files } = contenedorFotos;
+        for (let i = 0; i < files.length; i++) {
+            if (i !== index) nuevoContenedor.items.add(files[i]);
+        }
+        contenedorFotos = nuevoContenedor;
+        inputFotos.files = contenedorFotos.files;
+        previewImages(inputFotos);
+    }
+</script>
 {% endblock %}
