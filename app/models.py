@@ -8,6 +8,7 @@ class Propiedad(db.Model):
     titulo = db.Column(db.String(100), nullable=False)
     operacion = db.Column(db.String(20))  # Venta o Alquiler
     precio = db.Column(db.Integer)
+    moneda = db.Column(db.String(10), default='ARS')
     expensas = db.Column(db.Integer)
     ubicacion = db.Column(db.String(200))
     descripcion = db.Column(db.Text)

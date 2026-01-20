@@ -53,6 +53,8 @@ def cargar():
         nueva_propiedad = Propiedad(
             titulo=request.form.get('titulo'),
             precio=request.form.get('precio'),
+            moneda=request.form.get('moneda'), 
+            operacion=request.form.get('operacion'),
             ubicacion=request.form.get('ubicacion'),
             descripcion=request.form.get('descripcion'),
             m2_totales=request.form.get('m2_totales'),
@@ -91,6 +93,8 @@ def editar(id):
         p.titulo = request.form.get('titulo')
         p.ubicacion = request.form.get('ubicacion')
         p.precio = request.form.get('precio')
+        p.moneda=request.form.get('moneda'), 
+        p.operacion=request.form.get('operacion'),
         p.m2_totales = request.form.get('m2_totales')
         p.dormitorios = request.form.get('dormitorios')
         p.banios = request.form.get('banios')

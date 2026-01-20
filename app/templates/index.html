@@ -28,7 +28,9 @@
             <p class="text-muted small mb-2">
               <i class="bi bi-geo-alt"></i> {{ p.ubicacion }}
             </p>
-            <h6 class="text-primary fw-bold mb-0">USD {{ p.precio }}</h6>
+            <h6 class="text-primary fw-bold mb-0">
+    {{ p.moneda }} {{ "{:,.0f}".format(p.precio).replace(',', '.') }}
+</h6>
           </div>
 
           <div class="card-footer bg-white border-0 p-3 pt-0">

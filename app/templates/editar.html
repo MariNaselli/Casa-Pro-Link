@@ -14,9 +14,16 @@
                 <input type="text" name="titulo" class="form-control" value="{{ p.titulo }}" required>
             </div>
             <div class="col-md-3 mb-3">
-                <label class="form-label fw-medium">Precio</label>
-                <input type="number" name="precio" class="form-control" value="{{ p.precio }}">
-            </div>
+    <label class="form-label fw-medium">Precio</label>
+    <div class="input-group">
+        <select name="moneda" class="form-select" style="max-width: 90px;">
+            <option value="ARS" {% if p and p.moneda == 'ARS' %}selected{% endif %}>ARS</option>
+            <option value="USD" {% if p and p.moneda == 'USD' %}selected{% endif %}>USD</option>
+        </select>
+        <input type="number" name="precio" class="form-control" 
+               value="{{ p.precio if p else '' }}" step="1" min="0" required>
+    </div>
+</div>
             <div class="col-md-3 mb-3">
                 <label class="form-label fw-medium">Operación</label>
                 <select name="operacion" class="form-select">
