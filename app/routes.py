@@ -53,11 +53,14 @@ def cargar():
         nueva_propiedad = Propiedad(
             titulo=request.form.get('titulo'),
             precio=request.form.get('precio'),
+            calle = request.form.get('calle'),
+            altura = request.form.get('altura'),
+            barrio = request.form.get('barrio'),
             moneda=request.form.get('moneda'), 
             operacion=request.form.get('operacion'),
-            ubicacion=request.form.get('ubicacion'),
             descripcion=request.form.get('descripcion'),
             m2_totales=request.form.get('m2_totales'),
+            m2_cubiertos = request.form.get('m2_cubiertos'),
             dormitorios=request.form.get('dormitorios'),
             banios=request.form.get('banios'),
             propietario_nombre=request.form.get('propietario_nombre'),
@@ -91,11 +94,14 @@ def editar(id):
     if request.method == 'POST':
         # 1. CAPTURAR los datos del formulario (Asegurate de que estos nombres coincidan con el 'name' de tus inputs en el HTML)
         p.titulo = request.form.get('titulo')
-        p.ubicacion = request.form.get('ubicacion')
+        p.calle = request.form.get('calle')
+        p.altura = request.form.get('altura')
+        p.barrio = request.form.get('barrio')
         p.precio = request.form.get('precio')
-        p.moneda=request.form.get('moneda'), 
-        p.operacion=request.form.get('operacion'),
+        p.moneda=request.form.get('moneda')
+        p.operacion=request.form.get('operacion')
         p.m2_totales = request.form.get('m2_totales')
+        p.m2_cubiertos = request.form.get('m2_cubiertos')
         p.dormitorios = request.form.get('dormitorios')
         p.banios = request.form.get('banios')
         p.descripcion = request.form.get('descripcion')

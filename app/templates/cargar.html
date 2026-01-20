@@ -1,76 +1,152 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container mt-4 mb-5 pb-5">
+  <div class="d-flex align-items-center mb-3">
+    <i
+      class="bi bi-arrow-left fs-4 me-3"
+      style="cursor: pointer"
+      onclick="window.history.back()"
+      title="Volver"
+    ></i>
+    <h2 class="mb-0">Cargar Nueva Propiedad</h2>
+  </div>
 
-    <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-arrow-left fs-4 me-3" style="cursor: pointer;" onclick="window.history.back();" title="Volver"></i>
-        <h2 class="mb-0">Cargar Nueva Propiedad</h2>
-    </div>
-
-    <form action="{{ url_for('cargar') }}" method="POST" class="card p-4 shadow-sm">
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Título del Aviso</label>
-                <input type="text" name="titulo" class="form-control" placeholder="Ej: Casa 3 dorm. con quincho" required>
-            </div>
-            <div class="col-md-3 mb-3">
+  <form
+    action="{{ url_for('cargar') }}"
+    method="POST"
+    class="card p-4 shadow-sm"
+  >
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label fw-medium">Título</label>
+        <input
+          type="text"
+          name="titulo"
+          class="form-control"
+          placeholder="Ej: Casa 3 dorm. con quincho"
+          required
+        />
+      </div>
+      <div class="col-md-3 mb-3">
+        <label class="form-label fw-medium">Operación</label>
+        <select name="operacion" class="form-select">
+          <option value="Venta">Venta</option>
+          <option value="Alquiler">Alquiler</option>
+        </select>
+      </div>
+      <div class="col-md-3 mb-3">
     <label class="form-label fw-medium">Precio</label>
     <div class="input-group">
-        <select name="moneda" class="form-select" style="max-width: 90px;">
-            <option value="ARS" {% if p and p.moneda == 'ARS' %}selected{% endif %}>ARS</option>
-            <option value="USD" {% if p and p.moneda == 'USD' %}selected{% endif %}>USD</option>
+        <select name="moneda" class="form-select" style="max-width: 90px">
+            <option value="ARS" selected>ARS</option>
+            <option value="USD">USD</option>
         </select>
-        <input type="number" name="precio" class="form-control" 
-               value="{{ p.precio if p else '' }}" step="1" min="0" required>
+        <input
+            type="number"
+            name="precio"
+            class="form-control"
+            placeholder="Monto"
+            step="1"
+            min="0"
+            required
+        />
     </div>
 </div>
-            <div class="col-md-3 mb-3">
-                <label class="form-label">Operación</label>
-                <select name="operacion" class="form-select">
-                    <option value="Venta">Venta</option>
-                    <option value="Alquiler">Alquiler</option>
-                </select>
-            </div>
-        </div>
+      
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label">Ubicación</label>
-            <input type="text" name="ubicacion" class="form-control" placeholder="Barrio, Ciudad...">
-        </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label fw-medium">Calle</label>
+        <input
+          type="text"
+          name="calle"
+          class="form-control"
+          placeholder="Ej: Av. Colón"
+          value="{{ p.calle if p else '' }}"
+        />
+      </div>
+      <div class="col-md-2 mb-3">
+        <label class="form-label fw-medium">Altura</label>
+        <input
+          type="text"
+          name="altura"
+          class="form-control"
+          placeholder="123"
+          value="{{ p.altura if p else '' }}"
+        />
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label fw-medium">Barrio</label>
+        <input
+          type="text"
+          name="barrio"
+          class="form-control"
+          placeholder="Ej: Nueva Córdoba"
+          value="{{ p.barrio if p else '' }}"
+        />
+      </div>
+    </div>
 
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <label class="form-label">Dormitorios</label>
-                <input type="number" name="dormitorios" class="form-control">
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label">Baños</label>
-                <input type="number" name="banios" class="form-control">
-            </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label">M2 Totales</label>
-                <input type="number" name="m2_totales" class="form-control">
-            </div>
-        </div>
+    <div class="row">
+      <div class="col-md-3 mb-4">
+        <label class="form-label fw-medium">Dormitorios</label>
+        <input type="number" name="dormitorios" class="form-control" />
+      </div>
+      <div class="col-md-3 mb-4">
+        <label class="form-label fw-medium">Baños</label>
+        <input type="number" name="banios" class="form-control" />
+      </div>
+      <div class="col-md-3 mb-4">
+        <label class="form-label fw-medium">M2 Totales</label>
+        <input
+          type="number"
+          name="m2_totales"
+          class="form-control"
+          value="{{ p.m2_totales if p else '' }}"
+        />
+      </div>
+      <div class="col-md-3 mb-4">
+        <label class="form-label fw-medium">M2 Cubiertos</label>
+        <input
+          type="number"
+          name="m2_cubiertos"
+          class="form-control"
+          value="{{ p.m2_cubiertos if p else '' }}"
+        />
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-medium">Descripción de la Propiedad</label>
+      <textarea
+        name="descripcion"
+        class="form-control"
+        rows="4"
+        placeholder="Describe los detalles destacados de la propiedad..."
+      >
+{{ p.descripcion if p else '' }}</textarea
+      >
+    </div>
 
-        <div class="bg-light p-3 rounded mb-3">
-            <h5 class="mb-3">Datos Internos (Solo tú ves esto)</h5>
-            <div class="row">
-                <div class="col-md-6">
-                    <label class="form-label">Nombre Propietario</label>
-                    <input type="text" name="propietario_nombre" class="form-control">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Teléfono Propietario</label>
-                    <input type="text" name="propietario_tel" class="form-control">
-                </div>
-            </div>
+    <div class="bg-light p-3 rounded mb-3">
+      <h5 class="mb-3">Datos Propietario/a</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <label class="form-label fw-medium">Nombre</label>
+          <input type="text" name="propietario_nombre" class="form-control" />
         </div>
+        <div class="col-md-6">
+          <label class="form-label fw-medium">Teléfono</label>
+          <input type="text" name="propietario_tel" class="form-control" />
+        </div>
+      </div>
+    </div>
 
-        <div class="d-flex justify-content-between mt-4">
-            <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-success px-4">Guardar Propiedad</button>
-        </div>
-    </form>
+    <div class="d-flex justify-content-between mt-4">
+      <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancelar</a>
+      <button type="submit" class="btn btn-success px-4">
+        Guardar Propiedad
+      </button>
+    </div>
+  </form>
 </div>
 {% endblock %}

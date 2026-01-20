@@ -13,17 +13,12 @@
 
     <div class="d-flex gap-2">
       {% if session.admin_logged_in %}
-
       <a href="{{ url_for('editar', id=p.id, next='ficha') }}" class="btn btn-outline-primary rounded-pill px-3">
         <i class="bi bi-pencil"></i> Editar
       </a>
-
-      <button type="button" class="btn btn-outline-danger rounded-pill px-3" 
-              data-bs-toggle="modal" 
-              data-bs-target="#modalEliminarFicha">
+      <button type="button" class="btn btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalEliminarFicha">
         <i class="bi bi-trash"></i> Eliminar
       </button>
-
       <button onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')" class="btn btn-outline-success rounded-pill px-3">
         <i class="bi bi-whatsapp"></i> Compartir
       </button>
@@ -41,20 +36,25 @@
     <div class="col-md-5">
       <h1 class="fw-bold mb-3">{{ p.titulo }}</h1>
       <p class="text-muted fs-5">
-        <i class="bi bi-geo-alt"></i> {{ p.ubicacion }}
+        <i class="bi bi-geo-alt"></i> {{ p.barrio }}
       </p>
 
       <hr class="my-4" />
 
       <div class="mb-4">
-        <span class="text-muted small d-block">PRECIO</span>
-        <h2 class="text-primary fw-bold">USD {{ p.precio }}</h2>
+        <span class="text-muted small d-block">Precio</span>
+        <h2 class="text-primary fw-bold">{{ p.moneda }} {{ "{:,.0f}".format(p.precio).replace(',', '.') }}</h2>
       </div>
 
       <div class="row row-cols-2 g-3 mb-4">
         <div class="col border-start ps-3">
-          <span class="text-muted small d-block">Superficie</span>
-          <span class="fw-bold">{{ p.m2_totales }} m²</span>
+          <span class="text-muted small d-block">Operación</span>
+          <span class="fw-bold">{{ p.operacion }}</span>
+        </div>
+        <div class="col border-start ps-3">
+            <span class="text-muted small d-block mb-1">Superficie</span>
+            <span class="fw-bold d-block small">{{ p.m2_totales }} m² <small class="text-muted fw-normal">Totales</small></span>
+            <span class="fw-bold d-block small">{{ p.m2_cubiertos }} m² <small class="text-muted fw-normal">Cubiertos</small></span>
         </div>
         <div class="col border-start ps-3">
           <span class="text-muted small d-block">Dormitorios</span>
@@ -62,15 +62,13 @@
         </div>
         <div class="col border-start ps-3">
           <span class="text-muted small d-block">Baños</span>
-          <span class="fw-bold">{{ p.banos }}</span>
-        </div>
-        <div class="col border-start ps-3">
-          <span class="text-muted small d-block">Operación</span>
-          <span class="fw-bold">Venta</span>
+          <span class="fw-bold">{{ p.banios }}</span>
         </div>
       </div>
-
-      <div class="card bg-light border-0 rounded-4 p-4">
+    </div> </div> <div class="row mt-4">
+    <div class="row mt-4">
+    <div class="col-12">
+      <div class="py-2"> 
         <h5 class="fw-bold mb-3">Descripción</h5>
         <p class="text-secondary mb-0" style="white-space: pre-wrap">{{ p.descripcion }}</p>
       </div>
@@ -83,6 +81,7 @@
       </div>
       {% endif %}
     </div>
+  </div>
   </div>
 </div>
 

@@ -6,11 +6,13 @@ class Propiedad(db.Model):
     
     # Comercial (Público)
     titulo = db.Column(db.String(100), nullable=False)
-    operacion = db.Column(db.String(20))  # Venta o Alquiler
+    operacion = db.Column(db.String(20))
     precio = db.Column(db.Integer)
     moneda = db.Column(db.String(10), default='ARS')
     expensas = db.Column(db.Integer)
-    ubicacion = db.Column(db.String(200))
+    calle = db.Column(db.String(200))  
+    altura = db.Column(db.String(50))
+    barrio = db.Column(db.String(100)) 
     descripcion = db.Column(db.Text)
     
     # Ficha Técnica
