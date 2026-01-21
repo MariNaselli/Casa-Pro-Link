@@ -34,13 +34,13 @@ def home():
     if query.strip():
         
         lista_propiedades = Propiedad.query.filter(
-            Propiedad.activo == True, # <--- Agregamos esta condición
+            Propiedad.activo == True, 
             (Propiedad.titulo.contains(query) 
              | Propiedad.calle.contains(query)
              | Propiedad.barrio.contains(query))
         ).all()
     else:
-        # Si no hay búsqueda, traemos todas las que estén ACTIVA == True
+
         lista_propiedades = Propiedad.query.filter_by(activo=True).all()
         
     return render_template('index.html', propiedades=lista_propiedades, busqueda=query)
@@ -130,9 +130,21 @@ def editar(id):
     p = Propiedad.query.get_or_404(id)
     
     if request.method == 'POST':
-        # Actualizar datos de texto (ya lo tenés)
+        
         p.titulo = request.form.get('titulo')
-        # ... todos los demás campos ...
+        p.operacion = request.form.get('operacion')
+        p.precio = request.form.get('precio')
+        p.moneda = request.form.get('moneda')
+        p.calle = request.form.get('calle')
+        p.altura = request.form.get('altura')
+        p.barrio = request.form.get('barrio')
+        p.dormitorios = request.form.get('dormitorios')
+        p.banios = request.form.get('banios')
+        p.m2_totales = request.form.get('m2_totales')
+        p.m2_cubiertos = request.form.get('m2_cubiertos')
+        p.descripcion = request.form.get('descripcion')
+        p.propietario_nombre = request.form.get('propietario_nombre')
+        p.propietario_tel = request.form.get('propietario_tel')
 
         # Procesar NUEVAS imágenes (igual que en cargar)
         nuevas_fotos = request.files.getlist('imagenes')
