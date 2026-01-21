@@ -32,17 +32,18 @@ def home():
     query = request.args.get('q', '') 
     
     if query.strip():
-        # Filtramos: que esté ACTIVA Y que coincida con la búsqueda
+        
         lista_propiedades = Propiedad.query.filter(
             Propiedad.activo == True, # <--- Agregamos esta condición
-            (Propiedad.titulo.contains(query) | Propiedad.ubicacion.contains(query))
+            (Propiedad.titulo.contains(query) 
+             | Propiedad.calle.contains(query)
+             | Propiedad.barrio.contains(query))
         ).all()
     else:
         # Si no hay búsqueda, traemos todas las que estén ACTIVA == True
         lista_propiedades = Propiedad.query.filter_by(activo=True).all()
         
     return render_template('index.html', propiedades=lista_propiedades, busqueda=query)
-
 
 @app.route('/cargar', methods=['GET', 'POST'])
 def cargar():
@@ -115,6 +116,7 @@ def cargar():
         return redirect(url_for('home'))
 
     return render_template('cargar.html')
+
 @app.route('/propiedad/<int:id>')
 def ficha(id):
     propiedad = Propiedad.query.get_or_404(id)
@@ -149,7 +151,6 @@ def editar(id):
         
     return render_template('editar.html', p=p)
 
-# RUTA NUEVA PARA BORRAR UNA FOTO SOLA
 @app.route('/borrar_archivo/<int:id>')
 def borrar_archivo(id):
     archivo = Multimedia.query.get_or_404(id)
@@ -166,6 +167,7 @@ def borrar_archivo(id):
     
     flash('Archivo eliminado', 'info')
     return redirect(url_for('editar', id=propiedad_id))
+
 @app.route('/eliminar/<int:id>')
 def eliminar(id):
     if not session.get('admin_logged_in'):
