@@ -130,7 +130,7 @@ def editar(id):
     p = Propiedad.query.get_or_404(id)
     
     if request.method == 'POST':
-        
+        # 1. Actualización de campos de texto
         p.titulo = request.form.get('titulo')
         p.operacion = request.form.get('operacion')
         p.precio = request.form.get('precio')
@@ -146,19 +146,29 @@ def editar(id):
         p.propietario_nombre = request.form.get('propietario_nombre')
         p.propietario_tel = request.form.get('propietario_tel')
 
-        # Procesar NUEVAS imágenes (igual que en cargar)
+        # 2. Procesar NUEVAS IMÁGENES
         nuevas_fotos = request.files.getlist('imagenes')
         for file in nuevas_fotos:
             if file and file.filename != '':
                 filename = secure_filename(file.filename)
                 nombre_unico = f"{uuid.uuid4().hex}_{filename}"
                 file.save(os.path.join(app.static_folder, 'uploads', nombre_unico))
-                
                 nuevo_m = Multimedia(archivo_nombre=nombre_unico, tipo='imagen', propiedad_id=p.id)
                 db.session.add(nuevo_m)
 
+        # 3. Procesar NUEVOS VIDEOS
+        nuevos_videos = request.files.getlist('videos')
+        for video in nuevos_videos:
+            if video and video.filename != '':
+                v_filename = secure_filename(video.filename)
+                v_nombre_unico = f"{uuid.uuid4().hex}_{v_filename}"
+                video.save(os.path.join(app.static_folder, 'uploads', v_nombre_unico))
+                nuevo_v = Multimedia(archivo_nombre=v_nombre_unico, tipo='video', propiedad_id=p.id)
+                db.session.add(nuevo_v)
+
+        # 4. Guardar todo
         db.session.commit()
-        flash('Propiedad actualizada', 'success')
+        flash('¡Propiedad actualizada con éxito!', 'success')
         return redirect(url_for('ficha', id=p.id))
         
     return render_template('editar.html', p=p)
@@ -166,19 +176,16 @@ def editar(id):
 @app.route('/borrar_archivo/<int:id>')
 def borrar_archivo(id):
     archivo = Multimedia.query.get_or_404(id)
-    propiedad_id = archivo.propiedad_id
-    
     # Borrar archivo físico
     ruta = os.path.join(app.static_folder, 'uploads', archivo.archivo_nombre)
     if os.path.exists(ruta):
         os.remove(ruta)
     
-    # Borrar de la base de datos
     db.session.delete(archivo)
     db.session.commit()
     
-    flash('Archivo eliminado', 'info')
-    return redirect(url_for('editar', id=propiedad_id))
+    # Respondemos "OK" al JavaScript para que solo borre el cuadrito sin saltos
+    return {"status": "success"}, 200
 
 @app.route('/eliminar/<int:id>')
 def eliminar(id):

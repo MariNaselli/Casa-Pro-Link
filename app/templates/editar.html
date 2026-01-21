@@ -1,12 +1,7 @@
 {% extends "base.html" %} {% block content %}
 <div class="container mt-4 mb-5 pb-5">
   <div class="d-flex align-items-center mb-3">
-    <i
-      class="bi bi-arrow-left fs-4 me-3"
-      style="cursor: pointer"
-      onclick="window.history.back()"
-      title="Volver"
-    ></i>
+    <i class="bi bi-arrow-left fs-4 me-3" style="cursor: pointer" onclick="window.history.back()" title="Volver"></i>
     <h2 class="mb-0">Editar Propiedad: {{ p.titulo }}</h2>
   </div>
 
@@ -14,251 +9,220 @@
     <div class="row">
       <div class="col-md-6 mb-3">
         <label class="form-label fw-medium">Título</label>
-        <input
-          type="text"
-          name="titulo"
-          class="form-control"
-          value="{{ p.titulo }}"
-          required
-        />
+        <input type="text" name="titulo" class="form-control" value="{{ p.titulo }}" required />
       </div>
-            <div class="col-md-3 mb-3">
-    <label class="form-label fw-medium">Operación</label>
-    <select name="operacion" class="form-select">
-        <option value="Venta" {% if p.operacion == 'Venta' %}selected{% endif %}>
-            Venta
-        </option>
-        <option value="Alquiler" {% if p.operacion == 'Alquiler' %}selected{% endif %}>
-            Alquiler
-        </option>
-    </select>
-</div>
+      <div class="col-md-3 mb-3">
+        <label class="form-label fw-medium">Operación</label>
+        <select name="operacion" class="form-select">
+          <option value="Venta" {% if p.operacion == 'Venta' %}selected{% endif %}>Venta</option>
+          <option value="Alquiler" {% if p.operacion == 'Alquiler' %}selected{% endif %}>Alquiler</option>
+        </select>
+      </div>
       <div class="col-md-3 mb-3">
         <label class="form-label fw-medium">Precio</label>
         <div class="input-group">
-     <select name="moneda" class="form-select" style="max-width: 90px">
-  <option value="ARS" {% if p.moneda == 'ARS' %}selected{% endif %}>ARS</option>
-  <option value="USD" {% if p.moneda == 'USD' %}selected{% endif %}>USD</option>
-</select>
-          <input
-            type="number"
-            name="precio"
-            class="form-control"
-            value="{{ p.precio if p else '' }}"
-            step="1"
-            min="0"
-            required
-          />
+          <select name="moneda" class="form-select" style="max-width: 90px">
+            <option value="ARS" {% if p.moneda == 'ARS' %}selected{% endif %}>ARS</option>
+            <option value="USD" {% if p.moneda == 'USD' %}selected{% endif %}>USD</option>
+          </select>
+          <input type="number" name="precio" class="form-control" value="{{ p.precio }}" required />
         </div>
       </div>
-
     </div>
 
     <div class="row">
-      
       <div class="col-md-6 mb-3">
         <label class="form-label fw-medium">Calle</label>
-        <input
-          type="text"
-          name="calle"
-          class="form-control"
-          placeholder="Ej: Av. Colón"
-          value="{{ p.calle if p else '' }}"
-        />
+        <input type="text" name="calle" class="form-control" value="{{ p.calle }}" />
       </div>
       <div class="col-md-2 mb-3">
         <label class="form-label fw-medium">Altura</label>
-        <input
-          type="text"
-          name="altura"
-          class="form-control"
-          placeholder="123"
-          value="{{ p.altura if p else '' }}"
-        />
+        <input type="text" name="altura" class="form-control" value="{{ p.altura }}" />
       </div>
       <div class="col-md-4 mb-3">
         <label class="form-label fw-medium">Barrio</label>
-        <input
-          type="text"
-          name="barrio"
-          class="form-control"
-          placeholder="Ej: Nueva Córdoba"
-          value="{{ p.barrio if p else '' }}"
-        />
+        <input type="text" name="barrio" class="form-control" value="{{ p.barrio }}" />
       </div>
     </div>
 
     <div class="row">
       <div class="col-md-3 mb-4">
         <label class="form-label fw-medium">Dormitorios</label>
-        <input
-          type="number"
-          name="dormitorios"
-          class="form-control"
-          value="{{ p.dormitorios if p.dormitorios else '' }}"
-        />
+        <input type="number" name="dormitorios" class="form-control" value="{{ p.dormitorios }}" />
       </div>
       <div class="col-md-3 mb-4">
         <label class="form-label fw-medium">Baños</label>
-        <input
-          type="number"
-          name="banios"
-          class="form-control"
-          value="{{ p.banios if p.banios else '' }}"
-        />
+        <input type="number" name="banios" class="form-control" value="{{ p.banios }}" />
       </div>
       <div class="col-md-3 mb-4">
         <label class="form-label fw-medium">M2 Totales</label>
-        <input
-          type="number"
-          name="m2_totales"
-          class="form-control"
-          value="{{ p.m2_totales if p else '' }}"
-        />
+        <input type="number" name="m2_totales" class="form-control" value="{{ p.m2_totales }}" />
       </div>
       <div class="col-md-3 mb-4">
         <label class="form-label fw-medium">M2 Cubiertos</label>
-        <input
-          type="number"
-          name="m2_cubiertos"
-          class="form-control"
-          value="{{ p.m2_cubiertos if p else '' }}"
-        />
+        <input type="number" name="m2_cubiertos" class="form-control" value="{{ p.m2_cubiertos }}" />
       </div>
     </div>
-        <div class="mb-3">
-      <label class="form-label fw-medium">Descripción de la Propiedad</label>
-      <textarea
-        name="descripcion"
-        class="form-control"
-        rows="4"
-        placeholder="Describe los detalles destacados de la propiedad..."
-      >
-{{ p.descripcion if p else '' }}</textarea
-      >
+
+    <div class="mb-3">
+      <label class="form-label fw-medium">Descripción</label>
+      <textarea name="descripcion" class="form-control" rows="4">{{ p.descripcion }}</textarea>
     </div>
 
     <div class="mb-4">
-    <label class="form-label fw-bold">Imágenes Actuales</label>
-    <div class="d-flex flex-wrap gap-3 p-3 border rounded bg-light">
+      <label class="form-label fw-bold">Imágenes Actuales</label>
+      <div class="d-flex flex-wrap gap-3 p-3 border rounded bg-light">
         {% for archivo in p.archivos if archivo.tipo == 'imagen' %}
-        <div class="position-relative group">
-            <img src="{{ url_for('static', filename='uploads/' + archivo.archivo_nombre) }}" 
-                 class="rounded border shadow-sm" 
-                 style="width: 100px; height: 100px; object-fit: cover;">
-            <a href="{{ url_for('borrar_archivo', id=archivo.id) }}" 
-               class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 d-flex align-items-center justify-content-center" 
-               style="width: 24px; height: 24px;"
-               onclick="return confirm('¿Eliminar esta imagen permanentemente?')">
-                <i class="bi bi-trash fs-6"></i>
-            </a>
-            <div class="small text-muted text-truncate" style="max-width: 100px; font-size: 10px;">{{ archivo.archivo_nombre[-15:] }}</div>
+        <div class="position-relative">
+          <img src="{{ url_for('static', filename='uploads/' + archivo.archivo_nombre) }}" class="rounded border shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+          <button type="button" onclick="borrarArchivoAjax(this, '{{ archivo.id }}')" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border:none;">
+            <i class="bi bi-trash fs-6"></i>
+          </button>
         </div>
-        {% else %}
-        <p class="text-muted small mb-0">No hay imágenes cargadas.</p>
         {% endfor %}
-    </div>
-</div>
-
-<div class="mb-4">
-    <label class="form-label fw-bold text-primary">Subir más imágenes</label>
-    <div class="p-3 border-primary border-2 border-dashed rounded bg-light text-center mb-2" 
-         style="cursor: pointer; border-style: dashed !important;" 
-         onclick="document.getElementById('imagenesInput').click();">
-        <i class="bi bi-plus-circle fs-2 text-primary"></i>
-        <p class="small mb-0 text-primary">Haz clic para agregar nuevas fotos</p>
-    </div>
-    <input type="file" name="imagenes" id="imagenesInput" class="form-control d-none" accept="image/*" multiple onchange="previewImages(this)">
-    
-    <div id="lista-imagenes-nuevas" class="mt-2"></div>
-</div>
-
-    <div class="bg-light p-3 rounded mb-3 border">
-      <h5 class="mb-3">Datos Propietario/a</h5>
-      <div class="row">
-        <div class="col-md-6">
-          <label class="form-label small fw-medium">Nombre</label>
-          <input
-            type="text"
-            name="propietario_nombre"
-            class="form-control"
-            value="{{ p.propietario_nombre }}"
-          />
-        </div>
-        <div class="col-md-6">
-          <label class="form-label small fw-medium">Teléfono</label>
-          <input
-            type="text"
-            name="propietario_tel"
-            class="form-control"
-            value="{{ p.propietario_tel }}"
-          />
-        </div>
       </div>
     </div>
 
-    <div class="d-flex justify-content-between mt-4">
-      {% if origen == 'ficha' %}
-      <a href="{{ url_for('ficha', id=p.id) }}" class="btn btn-secondary px-4"
-        >Cancelar</a
-      >
-      {% else %}
-      <a href="{{ url_for('home') }}" class="btn btn-secondary px-4"
-        >Cancelar</a
-      >
-      {% endif %}
-
-      <button type="submit" class="btn btn-success">Guardar Cambios</button>
+    <div class="mb-4">
+      <label class="form-label fw-bold text-primary">Subir más imágenes</label>
+      <div class="p-3 border-primary border-2 border-dashed rounded bg-light text-center mb-2" style="cursor: pointer;" onclick="document.getElementById('imagenesInput').click();">
+        <i class="bi bi-plus-circle fs-2 text-primary"></i>
+        <p class="small mb-0">Agregar fotos</p>
+      </div>
+      <input type="file" name="imagenes" id="imagenesInput" class="form-control d-none" accept="image/*" multiple onchange="previewImages(this)">
+      <div id="lista-imagenes-nuevas" class="mt-2"></div>
     </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-bold">Videos Actuales</label>
+      <div class="d-flex flex-wrap gap-3 p-3 border rounded bg-light">
+        {% for archivo in p.archivos if archivo.tipo == 'video' %}
+        <div class="position-relative text-center">
+          <div class="rounded border bg-dark d-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px;">
+            <i class="bi bi-play-btn text-white fs-1"></i>
+          </div>
+          <button type="button" onclick="borrarArchivoAjax(this, '{{ archivo.id }}')" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border:none;">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="mb-4 text-danger">
+      <label class="form-label fw-bold">Agregar más videos</label>
+      <div class="p-3 border-danger border-2 border-dashed rounded bg-light text-center mb-2" style="cursor: pointer;" onclick="document.getElementById('videosInput').click();">
+        <i class="bi bi-play-circle fs-2"></i>
+        <p class="small mb-0">Agregar videos</p>
+      </div>
+      <input type="file" name="videos" id="videosInput" class="form-control d-none" accept="video/*" multiple onchange="previewVideos(this)">
+      <div id="lista-videos-nuevos" class="mt-2"></div>
+    </div>
+
+    <div class="bg-light p-3 rounded mb-3 border">
+        <h5 class="mb-3">Datos Propietario/a</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <label class="form-label small fw-medium">Nombre</label>
+            <input type="text" name="propietario_nombre" class="form-control" value="{{ p.propietario_nombre }}" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-medium">Teléfono</label>
+            <input type="text" name="propietario_tel" class="form-control" value="{{ p.propietario_tel }}" />
+          </div>
+        </div>
+      </div>
+  
+      <div class="d-flex justify-content-between mt-4">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary px-4">Cancelar</a>
+        <button type="submit" class="btn btn-success">Guardar Cambios</button>
+      </div>
   </form>
 </div>
 
 <script>
-    let contenedorFotos = new DataTransfer();
-    const inputFotos = document.getElementById('imagenesInput');
-    const vistaPrevia = document.getElementById('lista-imagenes-nuevas');
-
-    function previewImages(input) {
-        for (let file of input.files) {
-            contenedorFotos.items.add(file);
+  // --- FUNCIÓN MÁGICA: BORRAR SIN RECARGAR (AJAX) ---
+  function borrarArchivoAjax(boton, archivoId) {
+    fetch(`/borrar_archivo/${archivoId}`)
+      .then(response => {
+        if (response.ok) {
+          const divPadre = boton.closest('.position-relative');
+          divPadre.style.transition = "all 0.4s ease";
+          divPadre.style.opacity = "0";
+          divPadre.style.transform = "scale(0.5)";
+          setTimeout(() => divPadre.remove(), 400);
         }
-        input.files = contenedorFotos.files;
-        vistaPrevia.innerHTML = "";
-        
-        if (input.files.length > 0) {
-            const grid = document.createElement('div');
-            grid.className = "d-flex flex-wrap gap-2 mt-2";
-            vistaPrevia.appendChild(grid);
+      });
+  }
 
-            Array.from(input.files).forEach((f, index) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const div = document.createElement('div');
-                    div.className = "position-relative d-flex flex-column align-items-center";
-                    div.innerHTML = `
-                        <div class="position-relative">
-                            <img src="${e.target.result}" class="rounded border border-primary shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
-                            <button type="button" onclick="quitarFoto(${index})" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" style="width:20px; height:20px; font-size:12px;">×</button>
-                        </div>
-                        <span class="text-truncate mt-1" style="max-width: 80px; font-size: 10px;">${f.name}</span>
-                    `;
-                    grid.appendChild(div);
-                }
-                reader.readAsDataURL(f);
-            });
+  // --- LÓGICA PREVIEW FOTOS ---
+  let contenedorFotos = new DataTransfer();
+  function previewImages(input) {
+    const vistaPreviaFotos = document.getElementById('lista-imagenes-nuevas');
+    for (let file of input.files) { contenedorFotos.items.add(file); }
+    input.files = contenedorFotos.files;
+    vistaPreviaFotos.innerHTML = "";
+    if (input.files.length > 0) {
+      const grid = document.createElement('div');
+      grid.className = "d-flex flex-wrap gap-2 mt-2";
+      vistaPreviaFotos.appendChild(grid);
+      Array.from(input.files).forEach((f, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const div = document.createElement('div');
+          div.className = "position-relative d-flex flex-column align-items-center";
+          div.innerHTML = `
+            <div class="position-relative">
+              <img src="${e.target.result}" class="rounded border border-primary shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+              <button type="button" onclick="quitarFoto(${index})" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" style="width:20px; height:20px; font-size:12px;">×</button>
+            </div>
+            <span class="text-truncate mt-1" style="max-width: 80px; font-size: 10px;">${f.name}</span>`;
+          grid.appendChild(div);
         }
+        reader.readAsDataURL(f);
+      });
     }
+  }
+  function quitarFoto(index) {
+    const nuevo = new DataTransfer();
+    for (let i = 0; i < contenedorFotos.files.length; i++) { if (i !== index) nuevo.items.add(contenedorFotos.files[i]); }
+    contenedorFotos = nuevo;
+    document.getElementById('imagenesInput').files = contenedorFotos.files;
+    previewImages(document.getElementById('imagenesInput'));
+  }
 
-    function quitarFoto(index) {
-        const nuevoContenedor = new DataTransfer();
-        const { files } = contenedorFotos;
-        for (let i = 0; i < files.length; i++) {
-            if (i !== index) nuevoContenedor.items.add(files[i]);
-        }
-        contenedorFotos = nuevoContenedor;
-        inputFotos.files = contenedorFotos.files;
-        previewImages(inputFotos);
+  // --- LÓGICA PREVIEW VIDEOS ---
+  let contenedorVideos = new DataTransfer();
+  function previewVideos(input) {
+    const vistaPreviaVideos = document.getElementById('lista-videos-nuevos');
+    for (let file of input.files) { contenedorVideos.items.add(file); }
+    input.files = contenedorVideos.files;
+    vistaPreviaVideos.innerHTML = "";
+    if (input.files.length > 0) {
+      const grid = document.createElement('div');
+      grid.className = "d-flex flex-wrap gap-2 mt-2";
+      vistaPreviaVideos.appendChild(grid);
+      Array.from(input.files).forEach((f, index) => {
+        const div = document.createElement('div');
+        div.className = "position-relative d-flex flex-column align-items-center";
+        div.innerHTML = `
+          <div class="position-relative">
+            <div class="rounded border border-danger bg-dark d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
+              <i class="bi bi-play-fill text-white fs-2"></i>
+              <button type="button" onclick="quitarVideo(${index})" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" style="width:20px; height:20px; font-size:12px;">×</button>
+            </div>
+          </div>
+          <span class="text-truncate mt-1" style="max-width: 80px; font-size: 10px;">${f.name}</span>`;
+        grid.appendChild(div);
+      });
     }
+  }
+  function quitarVideo(index) {
+    const nuevo = new DataTransfer();
+    for (let i = 0; i < contenedorVideos.files.length; i++) { if (i !== index) nuevo.items.add(contenedorVideos.files[i]); }
+    contenedorVideos = nuevo;
+    document.getElementById('videosInput').files = contenedorVideos.files;
+    previewVideos(document.getElementById('videosInput'));
+  }
 </script>
-
 {% endblock %}

@@ -1,6 +1,5 @@
-{% extends "base.html" %} {% block title %}Ficha Técnica - {{ p.titulo }}{% endblock %} 
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Ficha Técnica - {{ p.titulo }}{%
+endblock %} {% block content %}
 <div class="container pb-5 mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
@@ -13,13 +12,24 @@
 
     <div class="d-flex gap-2">
       {% if session.admin_logged_in %}
-      <a href="{{ url_for('editar', id=p.id, next='ficha') }}" class="btn btn-outline-primary rounded-pill px-3">
+      <a
+        href="{{ url_for('editar', id=p.id, next='ficha') }}"
+        class="btn btn-outline-primary rounded-pill px-3"
+      >
         <i class="bi bi-pencil"></i> Editar
       </a>
-      <button type="button" class="btn btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalEliminarFicha">
+      <button
+        type="button"
+        class="btn btn-outline-danger rounded-pill px-3"
+        data-bs-toggle="modal"
+        data-bs-target="#modalEliminarFicha"
+      >
         <i class="bi bi-trash"></i> Eliminar
       </button>
-      <button onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')" class="btn btn-outline-success rounded-pill px-3">
+      <button
+        onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')"
+        class="btn btn-outline-success rounded-pill px-3"
+      >
         <i class="bi bi-whatsapp"></i> Compartir
       </button>
       {% endif %}
@@ -28,38 +38,79 @@
 
   <div class="row g-5">
     <div class="col-md-7">
-      <div id="carouselPropiedad" class="carousel slide rounded-4 overflow-hidden shadow-sm" data-bs-ride="carousel">
-        
+      {% set fotos = p.archivos | selectattr('tipo', 'equalto', 'imagen') | list
+      %} {% set videos = p.archivos | selectattr('tipo', 'equalto', 'video') |
+      list %} {% set lista_ordenada = fotos + videos %}
+
+      <div
+        id="carouselPropiedad"
+        class="carousel slide rounded-4 overflow-hidden shadow-sm"
+        data-bs-ride="carousel"
+        data-bs-interval="8000"
+      >
         <div class="carousel-indicators">
-          {% for archivo in p.archivos %}
-            <button type="button" data-bs-target="#carouselPropiedad" data-bs-slide-to="{{ loop.index0 }}" class="{{ 'active' if loop.first }}" aria-current="true"></button>
+          {% for archivo in lista_ordenada %}
+          <button
+            type="button"
+            data-bs-target="#carouselPropiedad"
+            data-bs-slide-to="{{ loop.index0 }}"
+            class="{{ 'active' if loop.first }}"
+            aria-current="true"
+          ></button>
           {% endfor %}
         </div>
 
-        <div class="carousel-inner">
-          {% for archivo in p.archivos %}
-            <div class="carousel-item {{ 'active' if loop.first }}">
-              {% if archivo.tipo == 'imagen' %}
-                <img src="{{ url_for('static', filename='uploads/' + archivo.archivo_nombre) }}" class="d-block w-100" style="height: 500px; object-fit: cover;" alt="Foto de {{ p.titulo }}">
-              {% elif archivo.tipo == 'video' %}
-                <video class="d-block w-100" style="height: 500px; object-fit: cover;" controls>
-                  <source src="{{ url_for('static', filename='uploads/' + archivo.archivo_nombre) }}" type="video/mp4">
-                  Tu navegador no soporta videos.
-                </video>
-              {% endif %}
+        <div class="carousel-inner bg-dark">
+          {% for archivo in lista_ordenada %}
+          <div class="carousel-item {{ 'active' if loop.first }}">
+            {% if archivo.tipo == 'imagen' %}
+            <img
+              src="{{ url_for('static', filename='uploads/' + archivo.archivo_nombre) }}"
+              class="d-block w-100"
+              style="height: 500px; object-fit: cover"
+              alt="Foto de {{ p.titulo }}"
+            />
+            {% elif archivo.tipo == 'video' %}
+            <div
+              class="d-flex align-items-center justify-content-center bg-black"
+              style="height: 500px"
+            >
+              <video class="w-100 h-100" style="object-fit: contain" controls>
+                <source
+                  src="{{ url_for('static', filename='uploads/' + archivo.archivo_nombre) }}"
+                  type="video/mp4"
+                />
+                Tu navegador no soporta videos.
+              </video>
             </div>
+            {% endif %}
+          </div>
           {% else %}
-            <div class="carousel-item active">
-              <img src="https://via.placeholder.com/800x500?text=Sin+Imágenes" class="d-block w-100" style="height: 500px; object-fit: cover;">
-            </div>
+          <div class="carousel-item active">
+            <img
+              src="https://via.placeholder.com/800x500?text=Sin+Imágenes"
+              class="d-block w-100"
+              style="height: 500px; object-fit: cover"
+            />
+          </div>
           {% endfor %}
         </div>
 
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselPropiedad" data-bs-slide="prev">
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#carouselPropiedad"
+          data-bs-slide="prev"
+        >
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Anterior</span>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselPropiedad" data-bs-slide="next">
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#carouselPropiedad"
+          data-bs-slide="next"
+        >
           <span class="carousel-control-next-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Siguiente</span>
         </button>
@@ -69,14 +120,17 @@
     <div class="col-md-5">
       <h1 class="fw-bold mb-3">{{ p.titulo }}</h1>
       <p class="text-muted fs-5">
-        <i class="bi bi-geo-alt"></i> {{ p.calle }} {{ p.altura }}, {{ p.barrio }}
+        <i class="bi bi-geo-alt"></i> {{ p.calle }} {{ p.altura }} {{ p.barrio
+        }}
       </p>
 
       <hr class="my-4" />
 
       <div class="mb-4">
         <span class="text-muted small d-block">Precio</span>
-        <h2 class="text-primary fw-bold">{{ p.moneda }} {{ "{:,.0f}".format(p.precio).replace(',', '.') }}</h2>
+        <h2 class="text-primary fw-bold">
+          {{ p.moneda }} {{ "{:,.0f}".format(p.precio).replace(',', '.') }}
+        </h2>
       </div>
 
       <div class="row row-cols-2 g-3 mb-4">
@@ -85,9 +139,15 @@
           <span class="fw-bold">{{ p.operacion }}</span>
         </div>
         <div class="col border-start ps-3">
-            <span class="text-muted small d-block mb-1">Superficie</span>
-            <span class="fw-bold d-block small">{{ p.m2_totales }} m² <small class="text-muted fw-normal">Totales</small></span>
-            <span class="fw-bold d-block small">{{ p.m2_cubiertos }} m² <small class="text-muted fw-normal">Cubiertos</small></span>
+          <span class="text-muted small d-block mb-1">Superficie</span>
+          <span class="fw-bold d-block small"
+            >{{ p.m2_totales }} m²
+            <small class="text-muted fw-normal">Totales</small></span
+          >
+          <span class="fw-bold d-block small"
+            >{{ p.m2_cubiertos }} m²
+            <small class="text-muted fw-normal">Cubiertos</small></span
+          >
         </div>
         <div class="col border-start ps-3">
           <span class="text-muted small d-block">Dormitorios</span>
@@ -98,12 +158,21 @@
           <span class="fw-bold">{{ p.banios }}</span>
         </div>
       </div>
-    </div> </div> <div class="row mt-4">
-    <div class="row mt-4 mx-0"> 
-    <div class="col-12 px-0"> 
-      <div class="py-2"> 
+    </div>
+  </div>
+
+  <div class="row mt-4 mx-0">
+    <div class="col-12 px-0">
+      <div class="py-2">
         <h5 class="fw-bold mb-1">Descripción</h5>
-        <p class="text-secondary mb-0" style="white-space: pre-wrap; max-width: 100%; overflow-wrap: break-word; word-break: break-word;">
+        <p
+          class="text-secondary mb-0"
+          style="
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            word-break: break-word;
+          "
+        >
           {{ p.descripcion }}
         </p>
       </div>
@@ -111,28 +180,51 @@
       {% if session.admin_logged_in %}
       <div class="mt-4 p-3 border-start border-4 border-warning bg-light">
         <h6 class="fw-bold text-warning-dark">INFO INTERNA</h6>
-        <p class="mb-1 small"><strong>Propietario:</strong> {{ p.propietario_nombre }}</p>
-        <p class="mb-0 small"><strong>Teléfono:</strong> {{ p.propietario_tel }}</p>
+        <p class="mb-1 small">
+          <strong>Propietario:</strong> {{ p.propietario_nombre }}
+        </p>
+        <p class="mb-0 small">
+          <strong>Teléfono:</strong> {{ p.propietario_tel }}
+        </p>
       </div>
       {% endif %}
     </div>
   </div>
-  </div>
 </div>
 
-<div class="modal fade" id="modalEliminarFicha" tabindex="-1" aria-hidden="true">
+<div
+  class="modal fade"
+  id="modalEliminarFicha"
+  tabindex="-1"
+  aria-hidden="true"
+>
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <div class="modal-header bg-light">
         <h5 class="modal-title fw-bold">Confirmar eliminación</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
       </div>
       <div class="modal-body text-center p-4">
-        <p class="mb-0 text-muted">¿Estás seguro que deseas eliminar esta propiedad?</p>
+        <p class="mb-0 text-muted">
+          ¿Estás seguro que deseas eliminar esta propiedad?
+        </p>
       </div>
       <div class="modal-footer border-0 justify-content-between">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <a href="{{ url_for('eliminar', id=p.id) }}" class="btn btn-danger px-4">Sí, eliminar</a>
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          data-bs-dismiss="modal"
+        >
+          Cancelar
+        </button>
+        <a href="{{ url_for('eliminar', id=p.id) }}" class="btn btn-danger px-4"
+          >Sí, eliminar</a
+        >
       </div>
     </div>
   </div>
@@ -141,7 +233,13 @@
 <script>
   function compartirWhatsApp(titulo, id) {
     const urlFicha = window.location.origin + "/propiedad/" + id;
-    const texto = "¡Hola! Te comparto la ficha de esta propiedad:\n\n" + "🏠 *" + titulo + "*\n" + "🔗 Ver detalles aquí: " + urlFicha;
+    const texto =
+      "¡Hola! Te comparto la ficha de esta propiedad:\n\n" +
+      "🏠 *" +
+      titulo +
+      "*\n" +
+      "🔗 Ver detalles aquí: " +
+      urlFicha;
     const urlFinal = "https://wa.me/?text=" + encodeURIComponent(texto);
     window.open(urlFinal, "_blank");
   }
