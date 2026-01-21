@@ -4,9 +4,10 @@ from flask_sqlalchemy import SQLAlchemy
 # 1. Inicializamos la base de datos sin conectarla aún
 db = SQLAlchemy()
 
+
 def create_app():
     app = Flask(__name__)
-    
+
     # Configuraciones
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///casaprolink.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -18,6 +19,5 @@ def create_app():
     # 3. Registramos las rutas
     with app.app_context():
         from . import routes
-        # Si usaste Blueprints esto cambia, pero si es simple, con el import alcanza
-        
+
     return app

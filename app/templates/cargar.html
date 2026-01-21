@@ -179,7 +179,7 @@
     </div>
 
     <script>
-      // Creamos un "contenedor" virtual para ir guardando todas las fotos que elijas
+      // Creamos un "contenedor" virtual para ir guardando todas las fotos
       let contenedorFotos = new DataTransfer();
       const inputFotos = document.getElementById("imagenesInput");
       const vistaPrevia = document.getElementById("lista-imagenes");
@@ -232,29 +232,30 @@
 
         contenedorFotos = nuevoContenedor;
         inputFotos.files = contenedorFotos.files;
-        previewImages(inputFotos); // Refrescar vista
+        previewImages(inputFotos);
       }
 
       // --- Lógica para acumular VIDEOS ---
-let contenedorVideos = new DataTransfer();
-const inputVideos = document.getElementById("videosInput");
-const vistaPreviaVideos = document.getElementById("lista-videos");
+      let contenedorVideos = new DataTransfer();
+      const inputVideos = document.getElementById("videosInput");
+      const vistaPreviaVideos = document.getElementById("lista-videos");
 
-function previewVideos(input) {
-    for (let file of input.files) {
-        contenedorVideos.items.add(file);
-    }
-    input.files = contenedorVideos.files;
-    vistaPreviaVideos.innerHTML = "";
+      function previewVideos(input) {
+        for (let file of input.files) {
+          contenedorVideos.items.add(file);
+        }
+        input.files = contenedorVideos.files;
+        vistaPreviaVideos.innerHTML = "";
 
-    if (input.files.length > 0) {
-        const grid = document.createElement("div");
-        grid.className = "d-flex flex-wrap gap-2 mt-2";
-        vistaPreviaVideos.appendChild(grid);
+        if (input.files.length > 0) {
+          const grid = document.createElement("div");
+          grid.className = "d-flex flex-wrap gap-2 mt-2";
+          vistaPreviaVideos.appendChild(grid);
 
-        Array.from(input.files).forEach((f, index) => {
+          Array.from(input.files).forEach((f, index) => {
             const div = document.createElement("div");
-            div.className = "position-relative d-flex flex-column align-items-center";
+            div.className =
+              "position-relative d-flex flex-column align-items-center";
             div.innerHTML = `
                 <div class="position-relative">
                     <div class="rounded border bg-dark d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
@@ -265,20 +266,20 @@ function previewVideos(input) {
                 <span class="text-truncate mt-1" style="max-width: 80px; font-size: 10px;" title="${f.name}">${f.name}</span>
             `;
             grid.appendChild(div);
-        });
-    }
-}
+          });
+        }
+      }
 
-function quitarVideo(index) {
-    const nuevoContenedor = new DataTransfer();
-    const { files } = contenedorVideos;
-    for (let i = 0; i < files.length; i++) {
-        if (i !== index) nuevoContenedor.items.add(files[i]);
-    }
-    contenedorVideos = nuevoContenedor;
-    inputVideos.files = contenedorVideos.files;
-    previewVideos(inputVideos); 
-}
+      function quitarVideo(index) {
+        const nuevoContenedor = new DataTransfer();
+        const { files } = contenedorVideos;
+        for (let i = 0; i < files.length; i++) {
+          if (i !== index) nuevoContenedor.items.add(files[i]);
+        }
+        contenedorVideos = nuevoContenedor;
+        inputVideos.files = contenedorVideos.files;
+        previewVideos(inputVideos);
+      }
     </script>
 
     <div class="bg-light p-3 rounded mb-3">
