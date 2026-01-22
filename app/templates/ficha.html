@@ -30,7 +30,7 @@
       {% set videos = p.archivos | selectattr('tipo', 'equalto', 'video') | list %} 
       {% set lista_ordenada = fotos + videos %}
 
-      <div id="carouselPropiedad" class="carousel slide rounded-4 overflow-hidden shadow-sm" data-bs-ride="carousel">
+      <div id="carouselPropiedad" class="carousel slide rounded-4 overflow-hidden shadow-sm">
         <div class="carousel-inner bg-dark">
           {% for archivo in lista_ordenada %}
           <div class="carousel-item {{ 'active' if loop.first }}">
@@ -165,6 +165,15 @@
 </div>
 
 <script>
+  // Pausar videos al cambiar de slide en el carrusel
+  const carousel = document.getElementById('carouselPropiedad');
+  if (carousel) {
+    carousel.addEventListener('slide.bs.carousel', function () {
+      const videos = carousel.querySelectorAll('video');
+      videos.forEach(video => video.pause());
+    });
+  }
+
   function actualizarEstadoInmo(id) {
     const isChecked = document.getElementById('checkInmo').checked;
     document.getElementById('seccionInmo').style.display = isChecked ? 'block' : 'none';

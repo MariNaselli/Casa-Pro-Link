@@ -262,7 +262,7 @@
 <script>
   // --- FUNCIÓN: BORRAR SIN RECARGAR (AJAX) ---
   function borrarArchivoAjax(boton, archivoId) {
-    fetch(`/borrar_archivo/${archivoId}`).then((response) => {
+    fetch(`/borrar_archivo/${archivoId}`, { method: 'POST' }).then((response) => {
       if (response.ok) {
         const divPadre = boton.closest(".position-relative");
         divPadre.style.transition = "all 0.4s ease";
