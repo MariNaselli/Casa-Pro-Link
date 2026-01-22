@@ -178,109 +178,107 @@
       </div>
     </div>
 
-    <script>
-      // Creamos un "contenedor" virtual para ir guardando todas las fotos
-      let contenedorFotos = new DataTransfer();
-      const inputFotos = document.getElementById("imagenesInput");
-      const vistaPrevia = document.getElementById("lista-imagenes");
+   <script>
+  // --- LÓGICA PARA FOTOS ---
+  let contenedorFotos = new DataTransfer();
+  const inputFotos = document.getElementById("imagenesInput");
+  const vistaPreviaFotos = document.getElementById("lista-imagenes");
 
-      function previewImages(input) {
-        // Agregamos los nuevos archivos seleccionados al contenedor virtual
-        for (let file of input.files) {
-          contenedorFotos.items.add(file);
-        }
+  function previewImages(input) {
+    // Solo agregamos los archivos que el usuario acaba de elegir en ESTA acción
+    for (let file of input.files) {
+      contenedorFotos.items.add(file);
+    }
+    // Sincronizamos
+    input.files = contenedorFotos.files;
+    renderFotos();
+  }
 
-        // Sincronizamos el input con nuestro contenedor virtual
-        input.files = contenedorFotos.files;
+  function renderFotos() {
+    vistaPreviaFotos.innerHTML = "";
+    const files = contenedorFotos.files;
+    
+    if (files.length > 0) {
+      const grid = document.createElement("div");
+      grid.className = "d-flex flex-wrap gap-2 mt-2";
+      vistaPreviaFotos.appendChild(grid);
 
-        // Limpiamos la vista previa y la volvemos a armar con TODO lo acumulado
-        vistaPrevia.innerHTML = "";
+      Array.from(files).forEach((f, index) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const div = document.createElement("div");
+          div.innerHTML = `
+            <div class="d-flex flex-column align-items-center">
+                <div class="position-relative">
+                    <img src="${e.target.result}" class="rounded border shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+                    <button type="button" onclick="quitarFoto(${index})" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" style="width:20px; height:20px; font-size:12px;">×</button>
+                </div>
+                <span class="text-truncate mt-1" style="max-width: 80px; font-size: 10px;">${f.name}</span>
+            </div>`;
+          grid.appendChild(div);
+        };
+        reader.readAsDataURL(f);
+      });
+    }
+  }
 
-        if (input.files.length > 0) {
-          const grid = document.createElement("div");
-          grid.className = "d-flex flex-wrap gap-2 mt-2";
-          vistaPrevia.appendChild(grid);
+  function quitarFoto(index) {
+    const nuevoContenedor = new DataTransfer();
+    Array.from(contenedorFotos.files).forEach((file, i) => {
+      if (i !== index) nuevoContenedor.items.add(file);
+    });
+    contenedorFotos = nuevoContenedor;
+    inputFotos.files = contenedorFotos.files; // Sincroniza el input real para el envío del form
+    renderFotos(); // Solo redibuja, no vuelve a procesar el input
+  }
 
-          Array.from(input.files).forEach((f, index) => {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              const div = document.createElement("div");
-              div.className = "position-relative";
-              div.innerHTML = `
-    <div class="d-flex flex-column align-items-center">
-        <div class="position-relative">
-            <img src="${e.target.result}" class="rounded border shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
-            <button type="button" onclick="quitarFoto(${index})" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" style="width:20px; height:20px; font-size:12px;">×</button>
-        </div>
-        <span class="text-truncate mt-1" style="max-width: 80px; font-size: 10px;" title="${f.name}">${f.name}</span>
-    </div>
-`;
-              grid.appendChild(div);
-            };
-            reader.readAsDataURL(f);
-          });
-        }
-      }
+  // --- LÓGICA PARA VIDEOS ---
+  let contenedorVideos = new DataTransfer();
+  const inputVideos = document.getElementById("videosInput");
+  const vistaPreviaVideos = document.getElementById("lista-videos");
 
-      function quitarFoto(index) {
-        const nuevoContenedor = new DataTransfer();
-        const { files } = contenedorFotos;
+  function previewVideos(input) {
+    for (let file of input.files) {
+      contenedorVideos.items.add(file);
+    }
+    input.files = contenedorVideos.files;
+    renderVideos();
+  }
 
-        for (let i = 0; i < files.length; i++) {
-          if (i !== index) nuevoContenedor.items.add(files[i]);
-        }
+  function renderVideos() {
+    vistaPreviaVideos.innerHTML = "";
+    if (contenedorVideos.files.length > 0) {
+      const grid = document.createElement("div");
+      grid.className = "d-flex flex-wrap gap-2 mt-2";
+      vistaPreviaVideos.appendChild(grid);
 
-        contenedorFotos = nuevoContenedor;
-        inputFotos.files = contenedorFotos.files;
-        previewImages(inputFotos);
-      }
-
-      // --- Lógica para acumular VIDEOS ---
-      let contenedorVideos = new DataTransfer();
-      const inputVideos = document.getElementById("videosInput");
-      const vistaPreviaVideos = document.getElementById("lista-videos");
-
-      function previewVideos(input) {
-        for (let file of input.files) {
-          contenedorVideos.items.add(file);
-        }
-        input.files = contenedorVideos.files;
-        vistaPreviaVideos.innerHTML = "";
-
-        if (input.files.length > 0) {
-          const grid = document.createElement("div");
-          grid.className = "d-flex flex-wrap gap-2 mt-2";
-          vistaPreviaVideos.appendChild(grid);
-
-          Array.from(input.files).forEach((f, index) => {
-            const div = document.createElement("div");
-            div.className =
-              "position-relative d-flex flex-column align-items-center";
-            div.innerHTML = `
+      Array.from(contenedorVideos.files).forEach((f, index) => {
+        const div = document.createElement("div");
+        div.innerHTML = `
+            <div class="d-flex flex-column align-items-center">
                 <div class="position-relative">
                     <div class="rounded border bg-dark d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
                         <i class="bi bi-play-fill text-white fs-2"></i>
                         <button type="button" onclick="quitarVideo(${index})" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" style="width:20px; height:20px; font-size:12px;">×</button>
                     </div>
                 </div>
-                <span class="text-truncate mt-1" style="max-width: 80px; font-size: 10px;" title="${f.name}">${f.name}</span>
-            `;
-            grid.appendChild(div);
-          });
-        }
-      }
+                <span class="text-truncate mt-1" style="max-width: 80px; font-size: 10px;">${f.name}</span>
+            </div>`;
+        grid.appendChild(div);
+      });
+    }
+  }
 
-      function quitarVideo(index) {
-        const nuevoContenedor = new DataTransfer();
-        const { files } = contenedorVideos;
-        for (let i = 0; i < files.length; i++) {
-          if (i !== index) nuevoContenedor.items.add(files[i]);
-        }
-        contenedorVideos = nuevoContenedor;
-        inputVideos.files = contenedorVideos.files;
-        previewVideos(inputVideos);
-      }
-    </script>
+  function quitarVideo(index) {
+    const nuevoContenedor = new DataTransfer();
+    Array.from(contenedorVideos.files).forEach((file, i) => {
+      if (i !== index) nuevoContenedor.items.add(file);
+    });
+    contenedorVideos = nuevoContenedor;
+    inputVideos.files = contenedorVideos.files;
+    renderVideos();
+  }
+</script>
 
     <div class="bg-light p-3 rounded mb-3">
       <h5 class="mb-3">Datos Propietario/a</h5>
