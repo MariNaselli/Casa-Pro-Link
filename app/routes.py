@@ -3,6 +3,7 @@ from .models import Propiedad, Multimedia, db
 import os
 import uuid
 from werkzeug.utils import secure_filename
+from sqlalchemy.orm import joinedload
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -27,6 +28,8 @@ def logout():
     return redirect(url_for('home'))
 
 
+from sqlalchemy.orm import joinedload # Asegúrate de tener esta importación arriba
+
 @app.route('/')
 def home():
     if not session.get('admin_logged_in'):
@@ -34,20 +37,18 @@ def home():
 
     query = request.args.get('q', '')
 
+    # Usamos .options(joinedload(Propiedad.multimedia)) para cargar las fotos
     if query.strip():
-
-        lista_propiedades = Propiedad.query.filter(
+        lista_propiedades = Propiedad.query.options(joinedload(Propiedad.archivos)).filter(
             Propiedad.activo == True,
             (Propiedad.titulo.contains(query)
              | Propiedad.calle.contains(query)
              | Propiedad.barrio.contains(query))
         ).all()
     else:
-
-        lista_propiedades = Propiedad.query.filter_by(activo=True).all()
+        lista_propiedades = Propiedad.query.options(joinedload(Propiedad.archivos)).filter_by(activo=True).all()
 
     return render_template('index.html', propiedades=lista_propiedades, busqueda=query)
-
 
 @app.route('/cargar', methods=['GET', 'POST'])
 def cargar():

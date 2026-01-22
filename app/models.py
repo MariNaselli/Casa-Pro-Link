@@ -22,6 +22,7 @@ class Propiedad(db.Model):
     propietario_tel = db.Column(db.String(50))
     notas_internas = db.Column(db.Text)
     activo = db.Column(db.Boolean, default=True)
+   
 
 
 class Multimedia(db.Model):
