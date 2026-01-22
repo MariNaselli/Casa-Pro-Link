@@ -72,6 +72,7 @@ def cargar():
             banios=request.form.get('banios'),
             propietario_nombre=request.form.get('propietario_nombre'),
             propietario_tel=request.form.get('propietario_tel'),
+            mostrar_inmo = request.form.get('mostrar_inmo') == 'on',
             activo=True
         )
 
@@ -152,6 +153,7 @@ def editar(id):
         p.descripcion = request.form.get('descripcion')
         p.propietario_nombre = request.form.get('propietario_nombre')
         p.propietario_tel = request.form.get('propietario_tel')
+        p.mostrar_inmo = request.form.get('mostrar_inmo') == 'on'
 
         # 2. Procesar NUEVAS IMÁGENES
         nuevas_fotos = request.files.getlist('imagenes')
@@ -208,3 +210,10 @@ def eliminar(id):
     db.session.commit()
     flash('La propiedad ha sido eliminada correctamente.', 'warning')
     return redirect(url_for('home'))
+
+@app.route('/toggle_inmo/<int:id>', methods=['POST'])
+def toggle_inmo(id):
+    p = Propiedad.query.get_or_404(id)
+    p.mostrar_inmo = not p.mostrar_inmo
+    db.session.commit()
+    return {"status": "success", "nuevo_estado": p.mostrar_inmo}
