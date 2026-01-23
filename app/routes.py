@@ -4,40 +4,44 @@ import os
 import uuid
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
+from flask_login import login_user, logout_user, login_required, current_user 
+from .models import Usuario
+from PIL import Image
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        usuario = request.form.get('usuario')
-        clave = request.form.get('clave')
-     # Acceso temporal
+    if current_user.is_authenticated: # Si ya está logueado, lo mandamos al home
+        return redirect(url_for('home'))
 
-        if usuario == 'admin' and clave == '1234':
-            session['admin_logged_in'] = True
+    if request.method == 'POST':
+        nombre_usuario = request.form.get('usuario')
+        clave = request.form.get('clave')
+        
+        # Buscamos al usuario en la base de datos
+        user = Usuario.query.filter_by(username=nombre_usuario).first()
+
+        # Verificamos si existe y si la clave (hasheada) coincide
+        if user and user.check_password(clave):
+            login_user(user) # <--- Aquí ocurre la magia de la sesión segura
             return redirect(url_for('home'))
         else:
-            return "Error: Usuario o contraseña incorrectos"
-
+            flash('Usuario o contraseña incorrectos', 'danger')
+    
     return render_template('login.html')
 
-
 @app.route('/logout')
+@login_required # Solo alguien logueado puede desloguearse
 def logout():
-    session.pop('admin_logged_in', None)
-    return redirect(url_for('home'))
-
-
-from sqlalchemy.orm import joinedload # Asegúrate de tener esta importación arriba
+    logout_user() # Borra la sesión de forma segura
+    return redirect(url_for('login'))
 
 @app.route('/')
+@login_required
 def home():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
 
     query = request.args.get('q', '')
 
-    # Usamos .options(joinedload(Propiedad.multimedia)) para cargar las fotos
     if query.strip():
         lista_propiedades = Propiedad.query.options(joinedload(Propiedad.archivos)).filter(
             Propiedad.activo == True,
@@ -51,9 +55,8 @@ def home():
     return render_template('index.html', propiedades=lista_propiedades, busqueda=query)
 
 @app.route('/cargar', methods=['GET', 'POST'])
+@login_required
 def cargar():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
 
     if request.method == 'POST':
 
@@ -81,17 +84,22 @@ def cargar():
         # Si hacés commit() acá, a veces se rompe la conexión para los archivos.
         db.session.flush()
 
-        # 2. PROCESAR IMÁGENES (Bucle for para que NO se pisen)
+        # 2. PROCESAR IMÁGENES
         imagenes = request.files.getlist('imagenes')
         for file in imagenes:
             if file and file.filename != '':
                 filename = secure_filename(file.filename)
-                # Nombre único con UUID para que no se pisen archivos iguales
                 nombre_unico = f"{uuid.uuid4().hex}_{filename}"
                 ruta = os.path.join(app.static_folder, 'uploads', nombre_unico)
+                
+                # Primero guardamos el archivo original
                 file.save(ruta)
 
-                # Creamos una entrada en Multimedia por CADA imagen
+                # --- NUEVO: OPTIMIZACIÓN ---
+                # Llamamos a la función para que la achique y comprima
+                optimizar_imagen(ruta) 
+                # ---------------------------
+
                 nuevo_m = Multimedia(
                     archivo_nombre=nombre_unico,
                     tipo='imagen',
@@ -126,19 +134,24 @@ def cargar():
 
 @app.route('/propiedad/<int:id>')
 def ficha(id):
+    # Buscamos la propiedad
     propiedad = Propiedad.query.get_or_404(id)
+    
+    # Si la propiedad no está activa Y el usuario no es admin...
+    if not propiedad.activo and not current_user.is_authenticated:
+        # Lo mandamos a una página de error o al home
+        flash("Esta propiedad ya no está disponible.", "info")
+        return redirect(url_for('home'))
+        
     return render_template('ficha.html', p=propiedad)
 
-
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar(id):
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-
+    # Eliminamos el chequeo manual de session, @login_required se encarga
     p = Propiedad.query.get_or_404(id)
 
     if request.method == 'POST':
-
         p.titulo = request.form.get('titulo')
         p.operacion = request.form.get('operacion')
         p.precio = request.form.get('precio')
@@ -161,22 +174,34 @@ def editar(id):
             if file and file.filename != '':
                 filename = secure_filename(file.filename)
                 nombre_unico = f"{uuid.uuid4().hex}_{filename}"
-                file.save(os.path.join(
-                    app.static_folder, 'uploads', nombre_unico))
+                ruta_final = os.path.join(app.static_folder, 'uploads', nombre_unico)
+                
+                # Guardamos la imagen
+                file.save(ruta_final)
+                
+                # --- NUEVO: OPTIMIZACIÓN EN EDICIÓN ---
+                optimizar_imagen(ruta_final)
+                
                 nuevo_m = Multimedia(
-                    archivo_nombre=nombre_unico, tipo='imagen', propiedad_id=p.id)
+                    archivo_nombre=nombre_unico, 
+                    tipo='imagen', 
+                    propiedad_id=p.id
+                )
                 db.session.add(nuevo_m)
 
-        # 3. Procesar NUEVOS VIDEOS
+        # 3. Procesar NUEVOS VIDEOS (Sin optimización de Pillow)
         nuevos_videos = request.files.getlist('videos')
         for video in nuevos_videos:
             if video and video.filename != '':
                 v_filename = secure_filename(video.filename)
                 v_nombre_unico = f"{uuid.uuid4().hex}_{v_filename}"
-                video.save(os.path.join(app.static_folder,
-                           'uploads', v_nombre_unico))
+                video.save(os.path.join(app.static_folder, 'uploads', v_nombre_unico))
+                
                 nuevo_v = Multimedia(
-                    archivo_nombre=v_nombre_unico, tipo='video', propiedad_id=p.id)
+                    archivo_nombre=v_nombre_unico, 
+                    tipo='video', 
+                    propiedad_id=p.id
+                )
                 db.session.add(nuevo_v)
 
         db.session.commit()
@@ -185,22 +210,31 @@ def editar(id):
 
     return render_template('editar.html', p=p)
 
-
 @app.route('/borrar_archivo/<int:id>')
+@login_required # <--- Siempre protegé estas rutas
 def borrar_archivo(id):
     archivo = Multimedia.query.get_or_404(id)
+    
+    # Construimos la ruta absoluta al archivo
     ruta = os.path.join(app.static_folder, 'uploads', archivo.archivo_nombre)
-    if os.path.exists(ruta):
-        os.remove(ruta)
+    
+    # Intentamos borrar el archivo físico
+    try:
+        if os.path.exists(ruta):
+            os.remove(ruta)
+            print(f"Archivo eliminado: {ruta}")
+    except Exception as e:
+        print(f"Error al borrar archivo físico: {e}")
+        # Aunque falle el borrado físico (ej: archivo no existe), 
+        # seguimos adelante para limpiar la base de datos.
 
     db.session.delete(archivo)
     db.session.commit()
 
-    # Respondemos "OK" al JavaScript para que solo borre el cuadrito sin saltos
     return {"status": "success"}, 200
 
-
 @app.route('/eliminar/<int:id>')
+@login_required
 def eliminar(id):
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
@@ -217,3 +251,23 @@ def toggle_inmo(id):
     p.mostrar_inmo = not p.mostrar_inmo
     db.session.commit()
     return {"status": "success", "nuevo_estado": p.mostrar_inmo}
+
+def optimizar_imagen(ruta_archivo):
+    try:
+        # Abrimos la imagen
+        with Image.open(ruta_archivo) as img:
+            # Convertimos a RGB (por si es un PNG con transparencia o un formato raro)
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+            
+            # Si es muy ancha, la redimensionamos proporcionalmente
+            max_ancho = 1200
+            if img.width > max_ancho:
+                proporcion = max_ancho / float(img.width)
+                alto_nuevo = int(float(img.height) * proporcion)
+                img = img.resize((max_ancho, alto_nuevo), Image.LANCZOS)
+            
+            # Guardamos con compresión (quality 70-80 es el punto dulce)
+            img.save(ruta_archivo, "JPEG", optimize=True, quality=75)
+    except Exception as e:
+        print(f"No se pudo optimizar la imagen {ruta_archivo}: {e}")

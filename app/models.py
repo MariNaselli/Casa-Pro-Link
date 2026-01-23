@@ -1,8 +1,8 @@
 from . import db
-
+from flask_login import UserMixin # Necesario para manejar la sesión
+from werkzeug.security import generate_password_hash, check_password_hash # Para encriptar
 
 class Propiedad(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(100), nullable=False)
     operacion = db.Column(db.String(20))
@@ -23,12 +23,23 @@ class Propiedad(db.Model):
     notas_internas = db.Column(db.Text)
     activo = db.Column(db.Boolean, default=True)
     mostrar_inmo = db.Column(db.Boolean, default=False)
-   
-
 
 class Multimedia(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     archivo_nombre = db.Column(db.String(255), nullable=False)
     tipo = db.Column(db.String(20), nullable=False)
-    propiedad_id = db.Column(db.Integer, db.ForeignKey(
-        'propiedad.id'), nullable=False)
+    propiedad_id = db.Column(db.Integer, db.ForeignKey('propiedad.id'), nullable=False)
+
+# TAREA 1: Definir el modelo de Usuario
+class Usuario(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False) # Aquí va la clave triturada
+
+    # Función para triturar la clave cuando la creas
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    # Función para comparar la clave cuando hacés login
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)

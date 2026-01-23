@@ -24,23 +24,20 @@
   </head>
   <body>
     {# Solo mostramos la barra si está logueado Y NO es login, cargar o editar
-    #} {% if session.admin_logged_in and request.endpoint not in ['login',
-    'cargar', 'editar'] %}
+    #} {% if current_user.is_authenticated %}
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
       <div class="container">
         <a class="navbar-brand fw-bold text-primary" href="/">CasaProLink</a>
 
-        <div class="ms-auto">
-          <a
-            href="{{ url_for('cargar') }}"
-            class="btn btn-primary btn-sm me-2 bi bi-plus"
-          >
-            Nueva Propiedad</a
-          >
-          <a href="{{ url_for('logout') }}" class="btn btn-outline-dark btn-sm"
-            >Salir</a
-          >
-        </div>
+        <div class="ms-auto d-flex align-items-center">
+    <span class="text-muted small me-3 d-none d-md-inline">
+        <i class="bi bi-person-circle"></i> {{ current_user.username }}
+    </span>
+    <a href="{{ url_for('cargar') }}" class="btn btn-primary btn-sm me-2">
+        <i class="bi bi-plus"></i> Nueva Propiedad
+    </a>
+    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Salir</a>
+</div>
       </div>
     </nav>
     {% endif %}
