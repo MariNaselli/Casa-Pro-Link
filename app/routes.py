@@ -234,18 +234,22 @@ def borrar_archivo(id):
     return {"status": "success"}, 200
 
 @app.route('/eliminar/<int:id>')
-@login_required
+@login_required # Flask-Login ya protege esta ruta
 def eliminar(id):
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-
+    # Buscamos la propiedad
     p = Propiedad.query.get_or_404(id)
-    p.activo = False
+    
+    # En lugar de borrarla de la base de datos, la desactivamos
+    p.activo = False 
+    
+    # Guardamos el cambio
     db.session.commit()
-    flash('La propiedad ha sido eliminada correctamente.', 'warning')
+    
+    flash('La propiedad ha sido quitada de la lista pública (archivada).', 'warning')
     return redirect(url_for('home'))
 
 @app.route('/toggle_inmo/<int:id>', methods=['POST'])
+@login_required
 def toggle_inmo(id):
     p = Propiedad.query.get_or_404(id)
     p.mostrar_inmo = not p.mostrar_inmo
