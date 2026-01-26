@@ -7,6 +7,15 @@ import os
 import uuid
 from werkzeug.utils import secure_filename
 
+@app.route('/admin')
+def admin():
+    # Si ya inició sesión, lo mandamos al home (donde verá sus botones)
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    
+    # Si no está logueado, lo mandamos directo al login
+    return redirect(url_for('login'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -26,7 +35,6 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/')
-@login_required
 def home():
     query = request.args.get('q', '')
     if query.strip():
@@ -152,7 +160,7 @@ def eliminar(id):
     p = Propiedad.query.get_or_404(id)
     p.activo = False 
     db.session.commit()
-    flash('Propiedad archivada.', 'warning')
+    flash('Propiedad eliminada.', 'warning')
     return redirect(url_for('home'))
 
 @app.route('/toggle_inmo/<int:id>', methods=['POST'])
