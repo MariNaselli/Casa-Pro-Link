@@ -1,305 +1,189 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} 
+
+{% block content %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
 <div class="container mt-4 mb-5 pb-5">
   <div class="d-flex align-items-center mb-3">
-    <i
-      class="bi bi-arrow-left fs-4 me-3"
-      style="cursor: pointer"
-      onclick="window.history.back()"
-      title="Volver"
-    ></i>
+    <i class="bi bi-arrow-left fs-4 me-3" style="cursor: pointer" onclick="window.history.back()"></i>
     <h2 class="mb-0">Cargar Nueva Propiedad</h2>
   </div>
 
-  <form
-    action="{{ url_for('cargar') }}"
-    method="POST"
-    enctype="multipart/form-data"
-    class="card p-4 shadow-sm"
-  >
+  <form id="propiedadForm" action="{{ url_for('cargar') }}" method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm">
+    
     <div class="row">
       <div class="col-md-6 mb-3">
-        <label class="form-label fw-medium">Título</label>
-        <input
-          type="text"
-          name="titulo"
-          class="form-control"
-          placeholder="Ej: Casa 3 dorm. con quincho"
-          required
-        />
+        <label class="form-label fw-medium small">Título</label>
+        <input type="text" name="titulo" class="form-control" placeholder="Ej: Casa 3 dorm. con quincho" required />
       </div>
       <div class="col-md-3 mb-3">
-        <label class="form-label fw-medium">Operación</label>
+        <label class="form-label fw-medium small">Operación</label>
         <select name="operacion" class="form-select">
           <option value="Venta">Venta</option>
           <option value="Alquiler">Alquiler</option>
         </select>
       </div>
       <div class="col-md-3 mb-3">
-        <label class="form-label fw-medium">Precio</label>
+        <label class="form-label fw-medium small">Precio</label>
         <div class="input-group">
           <select name="moneda" class="form-select" style="max-width: 90px">
-            <option value="ARS" selected>ARS</option>
+            <option value="ARS">ARS</option>
             <option value="USD">USD</option>
           </select>
-          <input
-            type="number"
-            name="precio"
-            class="form-control"
-            placeholder="Monto"
-            step="1"
-            min="0"
-            required
-          />
+          <input type="number" name="precio" class="form-control" placeholder="Monto" required />
         </div>
       </div>
     </div>
 
     <div class="row">
-      <div class="col-md-6 mb-3">
-        <label class="form-label fw-medium">Calle</label>
-        <input
-          type="text"
-          name="calle"
-          class="form-control"
-          placeholder="Ej: Av. Colón"
-          value="{{ p.calle if p else '' }}"
-        />
-      </div>
-      <div class="col-md-2 mb-3">
-        <label class="form-label fw-medium">Altura</label>
-        <input
-          type="text"
-          name="altura"
-          class="form-control"
-          placeholder="123"
-          value="{{ p.altura if p else '' }}"
-        />
-      </div>
-      <div class="col-md-4 mb-3">
-        <label class="form-label fw-medium">Barrio</label>
-        <input
-          type="text"
-          name="barrio"
-          class="form-control"
-          placeholder="Ej: Nueva Córdoba"
-          value="{{ p.barrio if p else '' }}"
-        />
+      <div class="col-md-4 mb-3"><label class="small">Calle</label><input type="text" name="calle" class="form-control" /></div>
+      <div class="col-md-2 mb-3"><label class="small">Altura</label><input type="text" name="altura" class="form-control" /></div>
+      <div class="col-md-3 mb-3"><label class="small">Barrio</label><input type="text" name="barrio" class="form-control" /></div>
+      <div class="col-md-3 mb-3"><label class="small">M2 Totales</label><input type="number" name="m2_totales" class="form-control" /></div>
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-bold text-secondary small">Comodidades</label>
+      <div class="d-flex flex-wrap gap-3 p-3 border rounded bg-light">
+        {% for item in [('cochera','car-front'), ('pileta','water'), ('quincho','fire'), ('patio','tree')] %}
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="{{item[0]}}" id="{{item[0]}}">
+          <label class="form-check-label" for="{{item[0]}}"><i class="bi bi-{{item[1]}}"></i> {{item[0]|capitalize}}</label>
+        </div>
+        {% endfor %}
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-md-3 mb-4">
-        <label class="form-label fw-medium">Dormitorios</label>
-        <input type="number" name="dormitorios" class="form-control" />
-      </div>
-      <div class="col-md-3 mb-4">
-        <label class="form-label fw-medium">Baños</label>
-        <input type="number" name="banios" class="form-control" />
-      </div>
-      <div class="col-md-3 mb-4">
-        <label class="form-label fw-medium">M2 Totales</label>
-        <input
-          type="number"
-          name="m2_totales"
-          class="form-control"
-          value="{{ p.m2_totales if p else '' }}"
-        />
-      </div>
-      <div class="col-md-3 mb-4">
-        <label class="form-label fw-medium">M2 Cubiertos</label>
-        <input
-          type="number"
-          name="m2_cubiertos"
-          class="form-control"
-          value="{{ p.m2_cubiertos if p else '' }}"
-        />
-      </div>
-    </div>
-    <div class="mb-3">
-      <label class="form-label fw-medium">Descripción de la Propiedad</label>
-      <textarea
-        name="descripcion"
-        class="form-control"
-        rows="4"
-        placeholder="Describe los detalles destacados de la propiedad..."
-      >
-{{ p.descripcion if p else '' }}</textarea
-      >
+    <div class="mb-4">
+      <label class="form-label fw-bold text-primary small">Descripción Pública</label>
+      <div id="editor-container" style="height: 200px; background: white;"></div>
+      <input type="hidden" name="descripcion" id="descripcion_input">
     </div>
 
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <label class="form-label fw-bold">Imágenes de la Propiedad</label>
-        <div
-          class="p-3 border rounded bg-light text-center mb-2"
-          style="cursor: pointer"
-          onclick="document.getElementById('imagenesInput').click()"
-        >
-          <i class="bi bi-camera fs-2 text-muted"></i>
-          <p class="small mb-0 text-muted">Haz clic para seleccionar fotos</p>
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <label class="form-label fw-bold text-success small">Fotos Públicas</label>
+        <div class="upload-zone" onclick="document.getElementById('imagenesInput').click()">
+          <i class="bi bi-camera fs-2"></i>
+          <p class="small mb-0">La primera será la portada</p>
         </div>
-        <input
-          type="file"
-          name="imagenes"
-          id="imagenesInput"
-          class="form-control d-none"
-          accept="image/*"
-          multiple
-          onchange="previewImages(this)"
-        />
-
-        <div
-          id="lista-imagenes"
-          class="mt-2 small text-primary fw-medium"
-        ></div>
+        <input type="file" name="imagenes" id="imagenesInput" class="d-none" accept="image/*" multiple onchange="handleFileSelect(this, 'lista-imagenes', 'foto')">
+        <div id="lista-imagenes" class="d-flex flex-wrap gap-2 mt-2"></div>
       </div>
 
-      <div class="col-md-6 mb-3">
-        <label class="form-label fw-bold">Videos de la Propiedad</label>
-        <div
-          class="p-3 border rounded bg-light text-center mb-2"
-          style="cursor: pointer"
-          onclick="document.getElementById('videosInput').click()"
-        >
-          <i class="bi bi-play-btn fs-2 text-muted"></i>
-          <p class="small mb-0 text-muted">Haz clic para seleccionar videos</p>
+      <div class="col-md-6">
+        <label class="form-label fw-bold text-success small">Videos Públicos</label>
+        <div class="upload-zone" onclick="document.getElementById('videosInput').click()">
+          <i class="bi bi-play-btn fs-2"></i>
         </div>
-        <input
-          type="file"
-          name="videos"
-          id="videosInput"
-          class="form-control d-none"
-          accept="video/*"
-          multiple
-          onchange="previewVideos(this)"
-        />
-
-        <div id="lista-videos" class="mt-2 small text-danger fw-medium"></div>
+        <input type="file" name="videos" id="videosInput" class="d-none" accept="video/*" multiple onchange="handleFileSelect(this, 'lista-videos', 'video')">
+        <div id="lista-videos" class="d-flex flex-wrap gap-2 mt-2"></div>
       </div>
     </div>
 
-   <script>
-  // --- LÓGICA PARA FOTOS ---
-  let contenedorFotos = new DataTransfer();
-  const inputFotos = document.getElementById("imagenesInput");
-  const vistaPreviaFotos = document.getElementById("lista-imagenes");
-
-  function previewImages(input) {
-    // Solo agregamos los archivos que el usuario acaba de elegir en ESTA acción
-    for (let file of input.files) {
-      contenedorFotos.items.add(file);
-    }
-    // Sincronizamos
-    input.files = contenedorFotos.files;
-    renderFotos();
-  }
-
-  function renderFotos() {
-    vistaPreviaFotos.innerHTML = "";
-    const files = contenedorFotos.files;
-    
-    if (files.length > 0) {
-      const grid = document.createElement("div");
-      grid.className = "d-flex flex-wrap gap-2 mt-2";
-      vistaPreviaFotos.appendChild(grid);
-
-      Array.from(files).forEach((f, index) => {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const div = document.createElement("div");
-          div.innerHTML = `
-            <div class="d-flex flex-column align-items-center">
-                <div class="position-relative">
-                    <img src="${e.target.result}" class="rounded border shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
-                    <button type="button" onclick="quitarFoto(${index})" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" style="width:20px; height:20px; font-size:12px;">×</button>
-                </div>
-                <span class="text-truncate mt-1" style="max-width: 80px; font-size: 10px;">${f.name}</span>
-            </div>`;
-          grid.appendChild(div);
-        };
-        reader.readAsDataURL(f);
-      });
-    }
-  }
-
-  function quitarFoto(index) {
-    const nuevoContenedor = new DataTransfer();
-    Array.from(contenedorFotos.files).forEach((file, i) => {
-      if (i !== index) nuevoContenedor.items.add(file);
-    });
-    contenedorFotos = nuevoContenedor;
-    inputFotos.files = contenedorFotos.files; // Sincroniza el input real para el envío del form
-    renderFotos(); // Solo redibuja, no vuelve a procesar el input
-  }
-
-  // --- LÓGICA PARA VIDEOS ---
-  let contenedorVideos = new DataTransfer();
-  const inputVideos = document.getElementById("videosInput");
-  const vistaPreviaVideos = document.getElementById("lista-videos");
-
-  function previewVideos(input) {
-    for (let file of input.files) {
-      contenedorVideos.items.add(file);
-    }
-    input.files = contenedorVideos.files;
-    renderVideos();
-  }
-
-  function renderVideos() {
-    vistaPreviaVideos.innerHTML = "";
-    if (contenedorVideos.files.length > 0) {
-      const grid = document.createElement("div");
-      grid.className = "d-flex flex-wrap gap-2 mt-2";
-      vistaPreviaVideos.appendChild(grid);
-
-      Array.from(contenedorVideos.files).forEach((f, index) => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-            <div class="d-flex flex-column align-items-center">
-                <div class="position-relative">
-                    <div class="rounded border bg-dark d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
-                        <i class="bi bi-play-fill text-white fs-2"></i>
-                        <button type="button" onclick="quitarVideo(${index})" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" style="width:20px; height:20px; font-size:12px;">×</button>
-                    </div>
-                </div>
-                <span class="text-truncate mt-1" style="max-width: 80px; font-size: 10px;">${f.name}</span>
-            </div>`;
-        grid.appendChild(div);
-      });
-    }
-  }
-
-  function quitarVideo(index) {
-    const nuevoContenedor = new DataTransfer();
-    Array.from(contenedorVideos.files).forEach((file, i) => {
-      if (i !== index) nuevoContenedor.items.add(file);
-    });
-    contenedorVideos = nuevoContenedor;
-    inputVideos.files = contenedorVideos.files;
-    renderVideos();
-  }
-</script>
-
-    <div class="bg-light p-3 rounded mb-3">
-      <h5 class="mb-3">Datos Propietario/a</h5>
-      <div class="row">
-        <div class="col-md-6">
-          <label class="form-label fw-medium">Nombre</label>
-          <input type="text" name="propietario_nombre" class="form-control" />
+    <div class="card border-dark mb-4 shadow-sm">
+      <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 fw-bold"><i class="bi bi-shield-lock"></i> Legajo Administrativo (Privado)</h6>
+        <button type="button" class="btn btn-sm btn-outline-light" onclick="agregarPropietario()">+ Propietario</button>
+      </div>
+      <div class="card-body bg-light" id="contenedor-propietarios">
         </div>
-        <div class="col-md-6">
-          <label class="form-label fw-medium">Teléfono</label>
-          <input type="text" name="propietario_tel" class="form-control" />
+      <div class="card-footer bg-white border-top">
+        <label class="form-label fw-bold text-danger small">Documentación Privada (Múltiple)</label>
+        <div class="upload-zone py-2" onclick="document.getElementById('docsInput').click()">
+          <i class="bi bi-file-earmark-pdf"></i> Subir Planos, Escrituras, etc.
         </div>
+        <input type="file" name="documentos" id="docsInput" class="d-none" accept=".pdf,image/*" multiple onchange="handleFileSelect(this, 'lista-docs', 'doc')">
+        <div id="lista-docs" class="mt-2 d-flex flex-wrap gap-2"></div>
       </div>
     </div>
 
     <div class="d-flex justify-content-between mt-4">
-      <a href="{{ url_for('home') }}" class="btn btn-secondary">Cancelar</a>
-      <button type="submit" class="btn btn-success px-4">
-        Guardar Propiedad
-      </button>
+      <a href="{{ url_for('home') }}" class="btn btn-secondary px-4">Cancelar</a>
+      <button type="submit" class="btn btn-success px-5 fw-bold">Guardar Todo</button>
     </div>
   </form>
 </div>
+
+<style>
+  .upload-zone { border: 2px dashed #dee2e6; border-radius: 8px; padding: 20px; text-align: center; background: #f8f9fa; cursor: pointer; transition: 0.3s; }
+  .upload-zone:hover { border-color: #0d6efd; background: #e9ecef; }
+  .preview-item { width: 85px; position: relative; }
+  .preview-item img, .preview-item .icon-box { height: 80px; width: 85px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
+  .preview-item .icon-box { display: flex; align-items: center; justify-content: center; background: #343a40; color: white; }
+  .btn-remove { position: absolute; top: -5px; right: -5px; width: 20px; height: 20px; padding: 0; font-size: 12px; border-radius: 50%; }
+</style>
+
+<script>
+    // Manager de archivos (DataTransfer por categoría para no mezclar)
+    const fileStores = {
+        foto: new DataTransfer(),
+        video: new DataTransfer(),
+        doc: new DataTransfer()
+    };
+
+    // FUNCIÓN UNIFICADA (DRY)
+    function handleFileSelect(input, containerId, type) {
+        const store = fileStores[type];
+        // Añade archivos sin borrar los anteriores (como un Store en Angular)
+        for (let file of input.files) { store.items.add(file); }
+        input.files = store.files;
+        renderPreviews(containerId, type, input.id);
+    }
+
+    function renderPreviews(containerId, type, inputId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        const store = fileStores[type];
+
+        Array.from(store.files).forEach((file, index) => {
+            const div = document.createElement("div");
+            div.className = "preview-item";
+            
+            let content = "";
+            if (type === 'foto' || (type === 'doc' && file.type.startsWith('image/'))) {
+                content = `<img src="${URL.createObjectURL(file)}">`;
+            } else {
+                let icon = type === 'video' ? 'bi-play-circle' : 'bi-file-earmark-pdf';
+                content = `<div class="icon-box"><i class="bi ${icon} fs-3"></i></div>`;
+            }
+
+            div.innerHTML = `
+                ${content}
+                <button type="button" onclick="removeFile('${type}', ${index}, '${containerId}', '${inputId}')" class="btn btn-danger btn-remove">×</button>
+                <div class="small text-truncate text-center" style="font-size: 9px">${file.name}</div>`;
+            container.appendChild(div);
+        });
+    }
+
+    function removeFile(type, index, containerId, inputId) {
+        const newStore = new DataTransfer();
+        const oldStore = fileStores[type];
+        Array.from(oldStore.files).forEach((file, i) => { if (i !== index) newStore.items.add(file); });
+        fileStores[type] = newStore;
+        document.getElementById(inputId).files = newStore.files;
+        renderPreviews(containerId, type, inputId);
+    }
+
+    // QUILL
+    var quill = new Quill('#editor-container', { theme: 'snow', modules: { toolbar: [['bold', 'italic'], [{ 'list': 'bullet' }, { 'list': 'ordered' }], ['clean']] } });
+    document.getElementById('propiedadForm').onsubmit = () => { document.getElementById('descripcion_input').value = quill.root.innerHTML; };
+
+    // PROPIETARIOS
+    function agregarPropietario() {
+        const div = document.createElement('div');
+        div.className = 'row mb-3 propietario-fila border-bottom pb-3 mt-2';
+        div.innerHTML = `
+            <div class="col-md-4 mb-2"><label class="small fw-bold">Nombre y Apellido</label><input type="text" name="propietario_nombre[]" class="form-control form-control-sm"></div>
+            <div class="col-md-4 mb-2"><label class="small fw-bold">Teléfono</label><input type="text" name="propietario_tel[]" class="form-control form-control-sm"></div>
+            <div class="col-md-4 mb-2"><label class="small fw-bold">DNI</label><input type="text" name="propietario_dni[]" class="form-control form-control-sm"></div>
+            <div class="col-md-11 mb-2"><label class="small fw-bold text-danger">Notas Administrativas</label><textarea name="notas_legajo[]" class="form-control form-control-sm" rows="2"></textarea></div>
+            <div class="col-md-1 d-flex align-items-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.propietario-fila').remove()">×</button></div>`;
+        document.getElementById('contenedor-propietarios').appendChild(div);
+    }
+    
+    // Iniciar con un propietario
+    window.onload = agregarPropietario;
+</script>
 {% endblock %}

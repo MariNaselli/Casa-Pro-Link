@@ -1,12 +1,8 @@
-from flask import flash, render_template, request, redirect, url_for, session, current_app as app
-from .models import Propiedad, Multimedia, db
-import os
-import uuid
-from werkzeug.utils import secure_filename
+from flask import flash, render_template, request, redirect, url_for, current_app as app
+from .models import Propiedad, Multimedia, db, Usuario, Propietario
 from sqlalchemy.orm import joinedload
 from flask_login import login_user, logout_user, login_required, current_user 
-from .models import Usuario
-from PIL import Image
+from .utils import guardar_archivo_multimedia # <--- IMPORTANTE
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -57,80 +53,69 @@ def home():
 @app.route('/cargar', methods=['GET', 'POST'])
 @login_required
 def cargar():
-
     if request.method == 'POST':
-
+        # 1. Instancia de Propiedad
         nueva_propiedad = Propiedad(
             titulo=request.form.get('titulo'),
             precio=request.form.get('precio'),
+            moneda=request.form.get('moneda'),
+            operacion=request.form.get('operacion'),
             calle=request.form.get('calle'),
             altura=request.form.get('altura'),
             barrio=request.form.get('barrio'),
-            moneda=request.form.get('moneda'),
-            operacion=request.form.get('operacion'),
-            descripcion=request.form.get('descripcion'),
+            descripcion=request.form.get('descripcion'), 
             m2_totales=request.form.get('m2_totales'),
             m2_cubiertos=request.form.get('m2_cubiertos'),
             dormitorios=request.form.get('dormitorios'),
             banios=request.form.get('banios'),
-            propietario_nombre=request.form.get('propietario_nombre'),
-            propietario_tel=request.form.get('propietario_tel'),
-            mostrar_inmo = request.form.get('mostrar_inmo') == 'on',
+            mostrar_inmo=request.form.get('mostrar_inmo') == 'on',
+            cochera=request.form.get('cochera') == 'on',
+            pileta=request.form.get('pileta') == 'on',
+            quincho=request.form.get('quincho') == 'on',
+            patio=request.form.get('patio') == 'on',
             activo=True
         )
-
         db.session.add(nueva_propiedad)
-        # IMPORTANTE: flush() genera el ID sin cerrar la sesión.
-        # Si hacés commit() acá, a veces se rompe la conexión para los archivos.
-        db.session.flush()
+        db.session.flush() 
 
-        # 2. PROCESAR IMÁGENES
-        imagenes = request.files.getlist('imagenes')
-        for file in imagenes:
-            if file and file.filename != '':
-                filename = secure_filename(file.filename)
-                nombre_unico = f"{uuid.uuid4().hex}_{filename}"
-                ruta = os.path.join(app.static_folder, 'uploads', nombre_unico)
-                
-                # Primero guardamos el archivo original
-                file.save(ruta)
+        # 2. PROCESAR PROPIETARIOS
+        data_propietarios = zip(
+            request.form.getlist('propietario_nombre[]'),
+            request.form.getlist('propietario_tel[]'),
+            request.form.getlist('propietario_email[]'),
+            request.form.getlist('propietario_dni[]'),
+            request.form.getlist('notas_legajo[]')
+        )
+        for n, t, e, d, nt in data_propietarios:
+            if n.strip(): 
+                db.session.add(Propietario(
+                    nombre=n, telefono=t, email=e, dni=d, 
+                    notas_legajo=nt, propiedad_id=nueva_propiedad.id
+                ))
 
-                # --- NUEVO: OPTIMIZACIÓN ---
-                # Llamamos a la función para que la achique y comprima
-                optimizar_imagen(ruta) 
-                # ---------------------------
-
-                nuevo_m = Multimedia(
-                    archivo_nombre=nombre_unico,
-                    tipo='imagen',
-                    propiedad_id=nueva_propiedad.id
+        # 3. PROCESAR MULTIMEDIA (Dinamismo puro)
+        mapeo = {'imagenes': 'imagen', 'videos': 'video', 'documentos': 'documento'}
+        
+        for input_name, tipo_db in mapeo.items():
+            for f in request.files.getlist(input_name):
+                # Llamamos a la utilidad. Ella decide si optimizar o no.
+                nombre_final = guardar_archivo_multimedia(
+                    f, 
+                    tipo_folder=('documentos' if tipo_db == 'documento' else 'uploads'),
+                    optimizar=(tipo_db != 'video')
                 )
-                db.session.add(nuevo_m)
-
-        # 3. PROCESAR VIDEOS
-        videos = request.files.getlist('videos')
-        for video in videos:
-            if video and video.filename != '':
-                v_filename = secure_filename(video.filename)
-                v_nombre_unico = f"{uuid.uuid4().hex}_{v_filename}"
-                v_ruta = os.path.join(
-                    app.static_folder, 'uploads', v_nombre_unico)
-                video.save(v_ruta)
-
-                nuevo_v = Multimedia(
-                    archivo_nombre=v_nombre_unico,
-                    tipo='video',
-                    propiedad_id=nueva_propiedad.id
-                )
-                db.session.add(nuevo_v)
+                if nombre_final:
+                    db.session.add(Multimedia(
+                        archivo_nombre=nombre_final, 
+                        tipo=tipo_db, 
+                        propiedad_id=nueva_propiedad.id
+                    ))
 
         db.session.commit()
-
-        flash('Propiedad y archivos cargados con éxito', 'success')
+        flash('Propiedad y Legajo cargados con éxito', 'success')
         return redirect(url_for('home'))
 
     return render_template('cargar.html')
-
 
 @app.route('/propiedad/<int:id>')
 def ficha(id):
@@ -255,23 +240,12 @@ def toggle_inmo(id):
     p.mostrar_inmo = not p.mostrar_inmo
     db.session.commit()
     return {"status": "success", "nuevo_estado": p.mostrar_inmo}
-
-def optimizar_imagen(ruta_archivo):
-    try:
-        # Abrimos la imagen
-        with Image.open(ruta_archivo) as img:
-            # Convertimos a RGB (por si es un PNG con transparencia o un formato raro)
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
-            
-            # Si es muy ancha, la redimensionamos proporcionalmente
-            max_ancho = 1200
-            if img.width > max_ancho:
-                proporcion = max_ancho / float(img.width)
-                alto_nuevo = int(float(img.height) * proporcion)
-                img = img.resize((max_ancho, alto_nuevo), Image.LANCZOS)
-            
-            # Guardamos con compresión (quality 70-80 es el punto dulce)
-            img.save(ruta_archivo, "JPEG", optimize=True, quality=75)
-    except Exception as e:
-        print(f"No se pudo optimizar la imagen {ruta_archivo}: {e}")
+     
+        
+@app.route('/propiedad/legajo/<int:id>')
+@login_required
+def ver_legajo(id):
+    propiedad = Propiedad.query.get_or_404(id)
+    # Filtramos solo los archivos que marcamos como 'documento'
+    documentos = [m for m in propiedad.archivos if m.tipo == 'documento']
+    return render_template('legajo.html', p=propiedad, documentos=documentos)

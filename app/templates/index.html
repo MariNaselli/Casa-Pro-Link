@@ -1,13 +1,20 @@
-{% extends "base.html" %} 
-
-{% block title %}Catálogo - Gestión Interna{% endblock %} 
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Catálogo - Gestión Interna{% endblock
+%} {% block content %}
 <div class="container">
   <div class="row justify-content-center my-5">
     <div class="col-md-6">
-      <form action="/" method="GET" class="input-group input-group-md shadow-sm">
-        <input type="text" name="q" class="form-control border-0" placeholder="Buscar por título o ubicación..." value="{{ busqueda if busqueda else '' }}" />
+      <form
+        action="/"
+        method="GET"
+        class="input-group input-group-md shadow-sm"
+      >
+        <input
+          type="text"
+          name="q"
+          class="form-control border-0"
+          placeholder="Buscar por título o ubicación..."
+          value="{{ busqueda if busqueda else '' }}"
+        />
         <button class="btn btn-primary" type="submit">
           <i class="bi bi-search"></i>
         </button>
@@ -23,28 +30,31 @@
       {% for p in propiedades %}
       <div class="col">
         <div class="card h-100 shadow-sm border-0 position-relative">
-          
-          {# --- LÓGICA DE IMAGEN CORREGIDA PARA TU MODELO --- #}
-          {# Buscamos en p.archivos porque así definiste la relación en models.py #}
-          {% set imagen_principal = p.archivos | selectattr('tipo', 'equalto', 'imagen') | first %}
-          
-          {% if imagen_principal %}
-            <img src="{{ url_for('static', filename='uploads/' + imagen_principal.archivo_nombre) }}" 
-                 class="card-img-top" 
-                 alt="{{ p.titulo }}"
-                 style="height: 180px; object-fit: cover;">
+          {# --- LÓGICA DE IMAGEN CORREGIDA PARA TU MODELO --- #} {# Buscamos en
+          p.archivos porque así definiste la relación en models.py #} {% set
+          imagen_principal = p.archivos | selectattr('tipo', 'equalto',
+          'imagen') | first %} {% if imagen_principal %}
+          <img
+            src="{{ url_for('static', filename='uploads/' + imagen_principal.archivo_nombre) }}"
+            class="card-img-top"
+            alt="{{ p.titulo }}"
+            style="height: 180px; object-fit: cover"
+          />
           {% else %}
-            <div class="bg-light d-flex align-items-center justify-content-center border-bottom text-muted" style="height: 180px;">
-              <div class="text-center">
-                <i class="bi bi-image fs-1"></i><br>
-                <small>Sin fotos</small>
-              </div>
+          <div
+            class="bg-light d-flex align-items-center justify-content-center border-bottom text-muted"
+            style="height: 180px"
+          >
+            <div class="text-center">
+              <i class="bi bi-image fs-1"></i><br />
+              <small>Sin fotos</small>
             </div>
-          {% endif %}
-
-          {# Badge de Operación (Venta/Alquiler) #}
+          </div>
+          {% endif %} {# Badge de Operación (Venta/Alquiler) #}
           <div class="position-absolute top-0 end-0 m-2">
-            <span class="badge {{ 'bg-success' if p.operacion == 'Venta' else 'bg-warning text-dark' }} shadow-sm">
+            <span
+              class="badge {{ 'bg-success' if p.operacion == 'Venta' else 'bg-warning text-dark' }} shadow-sm"
+            >
               {{ p.operacion }}
             </span>
           </div>
@@ -56,25 +66,55 @@
               <i class="bi bi-geo-alt"></i> {{ p.barrio }}
             </p>
             <h6 class="text-primary fw-bold mb-0">
-              {{ p.moneda }} {{ "{:,.0f}".format(p.precio).replace(',', '.') if p.precio else 'Consultar' }}
+              {{ p.moneda }} {{ "{:,.0f}".format(p.precio).replace(',', '.') if
+              p.precio else 'Consultar' }}
             </h6>
           </div>
 
           <div class="card-footer bg-white border-0 p-3 pt-0">
             <div class="d-flex align-items-center justify-content-between">
-              <a href="{{ url_for('ficha', id=p.id) }}" class="btn btn-sm btn-link p-0 text-decoration-none fw-bold">Ver detalle</a>
+              <a
+                href="{{ url_for('ficha', id=p.id) }}"
+                class="btn btn-sm btn-link p-0 text-decoration-none fw-bold"
+                >Ver detalle</a
+              >
 
               <div class="d-flex gap-3">
-                {% if current_user.is_authenticated %}
-                <a href="{{ url_for('editar', id=p.id, next='home') }}" class="link-primary" title="Editar">
+                {% if current_user.is_authenticated %} {# --- BOTÓN NUEVO: VER
+                LEGAJO --- #}
+                <a
+                  href="{{ url_for('ver_legajo', id=p.id) }}"
+                  class="link-dark"
+                  title="Ver Legajo Interno"
+                >
+                  <i class="bi bi-shield-lock-fill"></i>
+                </a>
+
+                <a
+                  href="{{ url_for('editar', id=p.id, next='home') }}"
+                  class="link-primary"
+                  title="Editar"
+                >
                   <i class="bi bi-pencil"></i>
                 </a>
 
-                <a href="#" class="link-danger" title="Eliminar" data-bs-toggle="modal" data-bs-target="#modalEliminar" onclick="prepararEliminar('{{ url_for('eliminar', id=p.id) }}')">
+                <a
+                  href="#"
+                  class="link-danger"
+                  title="Eliminar"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalEliminar"
+                  onclick="prepararEliminar('{{ url_for('eliminar', id=p.id) }}')"
+                >
                   <i class="bi bi-trash"></i>
                 </a>
 
-                <a href="#" class="link-success" title="Compartir vía WhatsApp" onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')">
+                <a
+                  href="#"
+                  class="link-success"
+                  title="Compartir vía WhatsApp"
+                  onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')"
+                >
                   <i class="bi bi-whatsapp"></i>
                 </a>
                 {% endif %}
@@ -96,19 +136,42 @@
 </div>
 
 {# Modales y Scripts... #}
-<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+<div
+  class="modal fade"
+  id="modalEliminar"
+  tabindex="-1"
+  aria-labelledby="modalEliminarLabel"
+  aria-hidden="true"
+>
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <div class="modal-header bg-light">
-        <h5 class="modal-title fw-bold" id="modalEliminarLabel">Confirmar eliminación</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title fw-bold" id="modalEliminarLabel">
+          Confirmar eliminación
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
       </div>
       <div class="modal-body text-center p-4">
-        <p class="mb-0 text-muted">¿Estás seguro que deseas eliminar esta propiedad?</p>
+        <p class="mb-0 text-muted">
+          ¿Estás seguro que deseas eliminar esta propiedad?
+        </p>
       </div>
       <div class="modal-footer border-0 justify-content-between">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <a id="btnConfirmarEliminar" href="#" class="btn btn-danger px-4">Sí, eliminar</a>
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          data-bs-dismiss="modal"
+        >
+          Cancelar
+        </button>
+        <a id="btnConfirmarEliminar" href="#" class="btn btn-danger px-4"
+          >Sí, eliminar</a
+        >
       </div>
     </div>
   </div>
@@ -121,7 +184,13 @@
 
   function compartirWhatsApp(titulo, id) {
     const urlFicha = window.location.origin + "/propiedad/" + id;
-    const texto = "¡Hola! Te comparto la ficha de esta propiedad:\n\n" + "🏠 *" + titulo + "*\n" + "🔗 Ver detalles aquí: " + urlFicha;
+    const texto =
+      "¡Hola! Te comparto la ficha de esta propiedad:\n\n" +
+      "🏠 *" +
+      titulo +
+      "*\n" +
+      "🔗 Ver detalles aquí: " +
+      urlFicha;
     const urlFinal = "https://wa.me/?text=" + encodeURIComponent(texto);
     window.open(urlFinal, "_blank");
   }
