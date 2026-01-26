@@ -36,7 +36,6 @@ class Propietario(db.Model):
     nombre = db.Column(db.String(100))
     telefono = db.Column(db.String(50))
     email = db.Column(db.String(100))
-    # --- NUEVOS CAMPOS INTERNOS ---
     dni = db.Column(db.String(20))
     domicilio_particular = db.Column(db.String(200))
     notas_legajo = db.Column(db.Text) # Aquí podés anotar datos de la escritura

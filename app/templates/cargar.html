@@ -1,21 +1,34 @@
-{% extends "base.html" %} 
-
-{% block content %}
-<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+{% extends "base.html" %} {% block content %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
 <div class="container mt-4 mb-5 pb-5">
   <div class="d-flex align-items-center mb-3">
-    <i class="bi bi-arrow-left fs-4 me-3" style="cursor: pointer" onclick="window.history.back()"></i>
+    <i
+      class="bi bi-arrow-left fs-4 me-3"
+      style="cursor: pointer"
+      onclick="window.history.back()"
+    ></i>
     <h2 class="mb-0">Cargar Nueva Propiedad</h2>
   </div>
 
-  <form id="propiedadForm" action="{{ url_for('cargar') }}" method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm">
-    
+  <form
+    id="propiedadForm"
+    action="{{ url_for('cargar') }}"
+    method="POST"
+    enctype="multipart/form-data"
+    class="card p-4 shadow-sm"
+  >
     <div class="row">
       <div class="col-md-6 mb-3">
         <label class="form-label fw-medium small">Título</label>
-        <input type="text" name="titulo" class="form-control" placeholder="Ej: Casa 3 dorm. con quincho" required />
+        <input
+          type="text"
+          name="titulo"
+          class="form-control"
+          placeholder="Ej: Casa 3 dorm. con quincho"
+          required
+        />
       </div>
       <div class="col-md-3 mb-3">
         <label class="form-label fw-medium small">Operación</label>
@@ -31,159 +44,297 @@
             <option value="ARS">ARS</option>
             <option value="USD">USD</option>
           </select>
-          <input type="number" name="precio" class="form-control" placeholder="Monto" required />
+          <input
+            type="number"
+            name="precio"
+            class="form-control"
+            placeholder="Monto"
+            required
+          />
         </div>
       </div>
     </div>
 
     <div class="row">
-      <div class="col-md-4 mb-3"><label class="small">Calle</label><input type="text" name="calle" class="form-control" /></div>
-      <div class="col-md-2 mb-3"><label class="small">Altura</label><input type="text" name="altura" class="form-control" /></div>
-      <div class="col-md-3 mb-3"><label class="small">Barrio</label><input type="text" name="barrio" class="form-control" /></div>
-      <div class="col-md-3 mb-3"><label class="small">M2 Totales</label><input type="number" name="m2_totales" class="form-control" /></div>
+      <div class="col-md-4 mb-3">
+        <label class="small">Calle</label
+        ><input type="text" name="calle" class="form-control" />
+      </div>
+      <div class="col-md-2 mb-3">
+        <label class="small">Altura</label
+        ><input type="text" name="altura" class="form-control" />
+      </div>
+      <div class="col-md-3 mb-3">
+        <label class="small">Barrio</label
+        ><input type="text" name="barrio" class="form-control" />
+      </div>
+      <div class="col-md-3 mb-3">
+        <label class="small">M2 Totales</label
+        ><input type="number" name="m2_totales" class="form-control" />
+      </div>
+      <div class="col-md-3 mb-3">
+        <label class="small fw-medium text-primary">M2 Cubiertos</label>
+        <input type="number" name="m2_cubiertos" class="form-control" placeholder="Edificado" />
+      </div>
     </div>
 
     <div class="mb-4">
       <label class="form-label fw-bold text-secondary small">Comodidades</label>
       <div class="d-flex flex-wrap gap-3 p-3 border rounded bg-light">
-        {% for item in [('cochera','car-front'), ('pileta','water'), ('quincho','fire'), ('patio','tree')] %}
+        {% for item in [('cochera','car-front'), ('pileta','water'),
+        ('quincho','fire'), ('patio','tree')] %}
         <div class="form-check">
-          <input class="form-check-input" type="checkbox" name="{{item[0]}}" id="{{item[0]}}">
-          <label class="form-check-label" for="{{item[0]}}"><i class="bi bi-{{item[1]}}"></i> {{item[0]|capitalize}}</label>
+          <input
+            class="form-check-input"
+            type="checkbox"
+            name="{{item[0]}}"
+            id="{{item[0]}}"
+          />
+          <label class="form-check-label" for="{{item[0]}}"
+            ><i class="bi bi-{{item[1]}}"></i> {{item[0]|capitalize}}</label
+          >
         </div>
         {% endfor %}
       </div>
     </div>
 
     <div class="mb-4">
-      <label class="form-label fw-bold text-primary small">Descripción Pública</label>
-      <div id="editor-container" style="height: 200px; background: white;"></div>
-      <input type="hidden" name="descripcion" id="descripcion_input">
+      <label class="form-label fw-bold text-primary small"
+        >Descripción</label
+      >
+      <div id="editor-container" style="height: 200px; background: white"></div>
+      <input type="hidden" name="descripcion" id="descripcion_input" />
     </div>
 
     <div class="row mb-4">
       <div class="col-md-6">
-        <label class="form-label fw-bold text-success small">Fotos Públicas</label>
-        <div class="upload-zone" onclick="document.getElementById('imagenesInput').click()">
+        <label class="form-label fw-bold text-success small"
+          >Imágenes</label
+        >
+        <div
+          class="upload-zone"
+          onclick="document.getElementById('imagenesInput').click()"
+        >
           <i class="bi bi-camera fs-2"></i>
           <p class="small mb-0">La primera será la portada</p>
         </div>
-        <input type="file" name="imagenes" id="imagenesInput" class="d-none" accept="image/*" multiple onchange="handleFileSelect(this, 'lista-imagenes', 'foto')">
+        <input
+          type="file"
+          name="imagenes"
+          id="imagenesInput"
+          class="d-none"
+          accept="image/*"
+          multiple
+          onchange="handleFileSelect(this, 'lista-imagenes', 'foto')"
+        />
         <div id="lista-imagenes" class="d-flex flex-wrap gap-2 mt-2"></div>
       </div>
 
       <div class="col-md-6">
-        <label class="form-label fw-bold text-success small">Videos Públicos</label>
-        <div class="upload-zone" onclick="document.getElementById('videosInput').click()">
+        <label class="form-label fw-bold text-success small"
+          >Videos</label
+        >
+        <div
+          class="upload-zone"
+          onclick="document.getElementById('videosInput').click()"
+        >
           <i class="bi bi-play-btn fs-2"></i>
         </div>
-        <input type="file" name="videos" id="videosInput" class="d-none" accept="video/*" multiple onchange="handleFileSelect(this, 'lista-videos', 'video')">
+        <input
+          type="file"
+          name="videos"
+          id="videosInput"
+          class="d-none"
+          accept="video/*"
+          multiple
+          onchange="handleFileSelect(this, 'lista-videos', 'video')"
+        />
         <div id="lista-videos" class="d-flex flex-wrap gap-2 mt-2"></div>
       </div>
     </div>
 
     <div class="card border-dark mb-4 shadow-sm">
-      <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-        <h6 class="mb-0 fw-bold"><i class="bi bi-shield-lock"></i> Legajo Administrativo (Privado)</h6>
-        <button type="button" class="btn btn-sm btn-outline-light" onclick="agregarPropietario()">+ Propietario</button>
+      <div
+        class="card-header bg-dark text-white d-flex justify-content-between align-items-center"
+      >
+        <h6 class="mb-0 fw-bold">
+          <i class="bi bi-shield-lock"></i> Datos Privados
+        </h6>
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-light"
+          onclick="agregarPropietario()"
+        >
+          + Propietario
+        </button>
       </div>
-      <div class="card-body bg-light" id="contenedor-propietarios">
-        </div>
+      <div class="card-body bg-light" id="contenedor-propietarios"></div>
       <div class="card-footer bg-white border-top">
-        <label class="form-label fw-bold text-danger small">Documentación Privada (Múltiple)</label>
-        <div class="upload-zone py-2" onclick="document.getElementById('docsInput').click()">
+        <label class="form-label fw-bold text-danger small"
+          >Documentación Privada (Múltiple)</label
+        >
+        <div
+          class="upload-zone py-2"
+          onclick="document.getElementById('docsInput').click()"
+        >
           <i class="bi bi-file-earmark-pdf"></i> Subir Planos, Escrituras, etc.
         </div>
-        <input type="file" name="documentos" id="docsInput" class="d-none" accept=".pdf,image/*" multiple onchange="handleFileSelect(this, 'lista-docs', 'doc')">
+        <input
+          type="file"
+          name="documentos"
+          id="docsInput"
+          class="d-none"
+          accept=".pdf,image/*"
+          multiple
+          onchange="handleFileSelect(this, 'lista-docs', 'doc')"
+        />
         <div id="lista-docs" class="mt-2 d-flex flex-wrap gap-2"></div>
       </div>
     </div>
 
     <div class="d-flex justify-content-between mt-4">
-      <a href="{{ url_for('home') }}" class="btn btn-secondary px-4">Cancelar</a>
-      <button type="submit" class="btn btn-success px-5 fw-bold">Guardar Todo</button>
+      <a href="{{ url_for('home') }}" class="btn btn-secondary px-4"
+        >Cancelar</a
+      >
+      <button type="submit" class="btn btn-success px-5 fw-bold">
+        Guardar Todo
+      </button>
     </div>
   </form>
 </div>
 
 <style>
-  .upload-zone { border: 2px dashed #dee2e6; border-radius: 8px; padding: 20px; text-align: center; background: #f8f9fa; cursor: pointer; transition: 0.3s; }
-  .upload-zone:hover { border-color: #0d6efd; background: #e9ecef; }
-  .preview-item { width: 85px; position: relative; }
-  .preview-item img, .preview-item .icon-box { height: 80px; width: 85px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
-  .preview-item .icon-box { display: flex; align-items: center; justify-content: center; background: #343a40; color: white; }
-  .btn-remove { position: absolute; top: -5px; right: -5px; width: 20px; height: 20px; padding: 0; font-size: 12px; border-radius: 50%; }
+  .upload-zone {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .upload-zone:hover {
+    border-color: #0d6efd;
+    background: #e9ecef;
+  }
+  .preview-item {
+    width: 85px;
+    position: relative;
+  }
+  .preview-item img,
+  .preview-item .icon-box {
+    height: 80px;
+    width: 85px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+  }
+  .preview-item .icon-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #343a40;
+    color: white;
+  }
+  .btn-remove {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    font-size: 12px;
+    border-radius: 50%;
+  }
 </style>
 
 <script>
-    // Manager de archivos (DataTransfer por categoría para no mezclar)
-    const fileStores = {
-        foto: new DataTransfer(),
-        video: new DataTransfer(),
-        doc: new DataTransfer()
-    };
+  // Manager de archivos (DataTransfer por categoría para no mezclar)
+  const fileStores = {
+    foto: new DataTransfer(),
+    video: new DataTransfer(),
+    doc: new DataTransfer(),
+  };
 
-    // FUNCIÓN UNIFICADA (DRY)
-    function handleFileSelect(input, containerId, type) {
-        const store = fileStores[type];
-        // Añade archivos sin borrar los anteriores (como un Store en Angular)
-        for (let file of input.files) { store.items.add(file); }
-        input.files = store.files;
-        renderPreviews(containerId, type, input.id);
+  // FUNCIÓN UNIFICADA (DRY)
+  function handleFileSelect(input, containerId, type) {
+    const store = fileStores[type];
+    // Añade archivos sin borrar los anteriores (como un Store en Angular)
+    for (let file of input.files) {
+      store.items.add(file);
     }
+    input.files = store.files;
+    renderPreviews(containerId, type, input.id);
+  }
 
-    function renderPreviews(containerId, type, inputId) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        const store = fileStores[type];
+  function renderPreviews(containerId, type, inputId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    const store = fileStores[type];
 
-        Array.from(store.files).forEach((file, index) => {
-            const div = document.createElement("div");
-            div.className = "preview-item";
-            
-            let content = "";
-            if (type === 'foto' || (type === 'doc' && file.type.startsWith('image/'))) {
-                content = `<img src="${URL.createObjectURL(file)}">`;
-            } else {
-                let icon = type === 'video' ? 'bi-play-circle' : 'bi-file-earmark-pdf';
-                content = `<div class="icon-box"><i class="bi ${icon} fs-3"></i></div>`;
-            }
+    Array.from(store.files).forEach((file, index) => {
+      const div = document.createElement("div");
+      div.className = "preview-item";
 
-            div.innerHTML = `
+      let content = "";
+      if (
+        type === "foto" ||
+        (type === "doc" && file.type.startsWith("image/"))
+      ) {
+        content = `<img src="${URL.createObjectURL(file)}">`;
+      } else {
+        let icon = type === "video" ? "bi-play-circle" : "bi-file-earmark-pdf";
+        content = `<div class="icon-box"><i class="bi ${icon} fs-3"></i></div>`;
+      }
+
+      div.innerHTML = `
                 ${content}
                 <button type="button" onclick="removeFile('${type}', ${index}, '${containerId}', '${inputId}')" class="btn btn-danger btn-remove">×</button>
                 <div class="small text-truncate text-center" style="font-size: 9px">${file.name}</div>`;
-            container.appendChild(div);
-        });
-    }
+      container.appendChild(div);
+    });
+  }
 
-    function removeFile(type, index, containerId, inputId) {
-        const newStore = new DataTransfer();
-        const oldStore = fileStores[type];
-        Array.from(oldStore.files).forEach((file, i) => { if (i !== index) newStore.items.add(file); });
-        fileStores[type] = newStore;
-        document.getElementById(inputId).files = newStore.files;
-        renderPreviews(containerId, type, inputId);
-    }
+  function removeFile(type, index, containerId, inputId) {
+    const newStore = new DataTransfer();
+    const oldStore = fileStores[type];
+    Array.from(oldStore.files).forEach((file, i) => {
+      if (i !== index) newStore.items.add(file);
+    });
+    fileStores[type] = newStore;
+    document.getElementById(inputId).files = newStore.files;
+    renderPreviews(containerId, type, inputId);
+  }
 
-    // QUILL
-    var quill = new Quill('#editor-container', { theme: 'snow', modules: { toolbar: [['bold', 'italic'], [{ 'list': 'bullet' }, { 'list': 'ordered' }], ['clean']] } });
-    document.getElementById('propiedadForm').onsubmit = () => { document.getElementById('descripcion_input').value = quill.root.innerHTML; };
+  // QUILL
+  var quill = new Quill("#editor-container", {
+    theme: "snow",
+    modules: {
+      toolbar: [
+        ["bold", "italic"],
+        [{ list: "bullet" }, { list: "ordered" }],
+        ["clean"],
+      ],
+    },
+  });
+  document.getElementById("propiedadForm").onsubmit = () => {
+    document.getElementById("descripcion_input").value = quill.root.innerHTML;
+  };
 
-    // PROPIETARIOS
-    function agregarPropietario() {
-        const div = document.createElement('div');
-        div.className = 'row mb-3 propietario-fila border-bottom pb-3 mt-2';
-        div.innerHTML = `
+  // PROPIETARIOS
+  function agregarPropietario() {
+    const div = document.createElement("div");
+    div.className = "row mb-3 propietario-fila border-bottom pb-3 mt-2";
+    div.innerHTML = `
             <div class="col-md-4 mb-2"><label class="small fw-bold">Nombre y Apellido</label><input type="text" name="propietario_nombre[]" class="form-control form-control-sm"></div>
             <div class="col-md-4 mb-2"><label class="small fw-bold">Teléfono</label><input type="text" name="propietario_tel[]" class="form-control form-control-sm"></div>
             <div class="col-md-4 mb-2"><label class="small fw-bold">DNI</label><input type="text" name="propietario_dni[]" class="form-control form-control-sm"></div>
             <div class="col-md-11 mb-2"><label class="small fw-bold text-danger">Notas Administrativas</label><textarea name="notas_legajo[]" class="form-control form-control-sm" rows="2"></textarea></div>
             <div class="col-md-1 d-flex align-items-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.propietario-fila').remove()">×</button></div>`;
-        document.getElementById('contenedor-propietarios').appendChild(div);
-    }
-    
-    // Iniciar con un propietario
-    window.onload = agregarPropietario;
+    document.getElementById("contenedor-propietarios").appendChild(div);
+  }
+
+  // Iniciar con un propietario
+  window.onload = agregarPropietario;
 </script>
 {% endblock %}
