@@ -4,17 +4,19 @@
 <div class="container pb-5 mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <a href="/" class="text-decoration-none text-muted fw-medium">
+      {% if current_user.is_authenticated %}
+      <a href="/" class="text-decoration-none text-muted fw-medium border px-3 py-1 rounded-pill bg-white">
         <i class="bi bi-arrow-left"></i> Volver al Catálogo
       </a>
+      {% endif %}
     </div>
 
     <div class="d-flex gap-2">
       {% if current_user.is_authenticated %}
-      <a href="{{ url_for('editar', id=p.id) }}" class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
+      <a href="{{ url_for('editar', id=p.id) }}" class="btn btn-outline-primary rounded-pill px-3 shadow-sm btn-sm">
         <i class="bi bi-pencil"></i> Editar
       </a>
-      <button type="button" class="btn btn-outline-danger rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEliminarFicha">
+      <button type="button" class="btn btn-outline-danger rounded-pill px-3 shadow-sm btn-sm" data-bs-toggle="modal" data-bs-target="#modalEliminarFicha">
         <i class="bi bi-trash"></i> Eliminar
       </button>
       {% endif %}
@@ -73,22 +75,10 @@
       </div>
 
       <div class="row row-cols-2 g-3 mb-4 bg-light p-3 rounded-4 border">
-        <div class="col">
-          <span class="text-muted small d-block">Terreno</span>
-          <span class="fw-bold fs-5">{{ p.m2_totales }} m²</span>
-        </div>
-        <div class="col border-start ps-3">
-          <span class="text-muted small d-block">Cubiertos</span>
-          <span class="fw-bold fs-5">{{ p.m2_cubiertos }} m²</span>
-        </div>
-        <div class="col mt-3">
-          <span class="text-muted small d-block">Dormitorios</span>
-          <span class="fw-bold fs-5"><i class="bi bi-door-open"></i> {{ p.dormitorios }}</span>
-        </div>
-        <div class="col border-start ps-3 mt-3">
-          <span class="text-muted small d-block">Baños</span>
-          <span class="fw-bold fs-5"><i class="bi bi-droplet"></i> {{ p.banios }}</span>
-        </div>
+        <div class="col"><span class="text-muted small d-block">Terreno</span><span class="fw-bold fs-5">{{ p.m2_totales }} m²</span></div>
+        <div class="col border-start ps-3"><span class="text-muted small d-block">Cubiertos</span><span class="fw-bold fs-5">{{ p.m2_cubiertos }} m²</span></div>
+        <div class="col mt-3"><span class="text-muted small d-block">Dormitorios</span><span class="fw-bold fs-5"><i class="bi bi-door-open"></i> {{ p.dormitorios }}</span></div>
+        <div class="col border-start ps-3 mt-3"><span class="text-muted small d-block">Baños</span><span class="fw-bold fs-5"><i class="bi bi-droplet"></i> {{ p.banios }}</span></div>
       </div>
 
       <div class="mb-4 d-flex flex-wrap gap-2">
@@ -114,14 +104,14 @@
 
       {% if current_user.is_authenticated %}
       <div class="card bg-white border-success p-3 rounded-4 shadow-sm">
-        <h6 class="fw-bold mb-3 text-success"><i class="bi bi-share"></i> Gestión de Enlace</h6>
+        <h6 class="fw-bold mb-3 text-success small text-center text-uppercase"><i class="bi bi-share"></i> Gestión de Enlace</h6>
         <div class="form-check form-switch mb-3">
           <input class="form-check-input" type="checkbox" id="checkInmo" {% if p.mostrar_inmo %}checked{% endif %} onchange="actualizarEstadoInmo({{ p.id }})" />
-          <label class="form-check-label small fw-medium" for="checkInmo">Mostrar contacto inmobiliario</label>
+          <label class="form-check-label small fw-medium" for="checkInmo">Mostrar datos de Inmobiliaria</label>
         </div>
         <div class="d-flex gap-2">
-          <button onclick="compartirWhatsApp()" class="btn btn-success flex-grow-1 rounded-pill"><i class="bi bi-whatsapp"></i> WhatsApp</button>
-          <button id="btnCopiar" onclick="copiarLink()" class="btn btn-outline-dark rounded-pill"><i class="bi bi-link-45deg"></i> Copiar</button>
+          <button onclick="compartirWhatsApp()" class="btn btn-success flex-grow-1 rounded-pill shadow-sm"><i class="bi bi-whatsapp"></i> Compartir</button>
+          <button id="btnCopiar" onclick="copiarLink()" class="btn btn-outline-dark rounded-pill shadow-sm"><i class="bi bi-link-45deg"></i> Copiar Link</button>
         </div>
       </div>
       {% endif %}
@@ -129,36 +119,39 @@
   </div>
 
   <div class="row mt-5">
-    <div class="col-lg-8">
-      <h5 class="fw-bold mb-3 border-bottom pb-2">Descripción de la Propiedad</h5>
-      <div class="text-secondary lh-lg">
-        {# El filtro |safe es VITAL para que Quill funcione #}
+    <div class="col-12">
+      <h4 class="fw-bold mb-3 border-bottom pb-2">Descripción de la Propiedad</h4>
+      <div class="text-secondary lh-lg mb-5" style="font-size: 1.1rem;">
         {{ p.descripcion|safe }}
       </div>
     </div>
 
     {% if current_user.is_authenticated %}
-    <div class="col-lg-4">
-      <div class="card border-0 bg-light p-4 rounded-4 shadow-sm border-start border-4 border-warning">
-        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-badge"></i> DATOS DE LEGAJO</h6>
-        {% for prop in p.propietarios %}
-            <div class="{{ 'mb-3 pb-2 border-bottom' if not loop.last }}">
-                <p class="mb-1"><strong>Dueño:</strong> {{ prop.nombre }}</p>
-                <p class="mb-1"><strong>DNI:</strong> {{ prop.dni or 'N/A' }}</p>
-                <p class="mb-1"><strong>Tel:</strong> {{ prop.telefono }}</p>
-                {% if prop.notas_legajo %}
-                <div class="small text-muted bg-white p-2 rounded mt-1 border">
-                    <i class="bi bi-journal-text"></i> {{ prop.notas_legajo }}
-                </div>
-                {% endif %}
-            </div>
-        {% else %}
-            <p class="small text-muted">No hay propietarios cargados.</p>
-        {% endfor %}
-        <div class="d-grid mt-3">
-            <a href="{{ url_for('ver_legajo', id=p.id) }}" class="btn btn-dark btn-sm rounded-pill">
-                <i class="bi bi-file-earmark-lock"></i> Ver Documentación Privada
+    <div class="col-12 mt-4">
+      <div class="card border-0 bg-dark text-white p-4 rounded-4 shadow-lg border-start border-5 border-warning">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="fw-bold mb-0 text-warning"><i class="bi bi-shield-lock"></i> DATOS PRIVADOS DE LEGAJO (SOLO ADMIN)</h5>
+            <a href="{{ url_for('ver_legajo', id=p.id) }}" class="btn btn-warning btn-sm rounded-pill fw-bold px-3 shadow-sm">
+                <i class="bi bi-file-earmark-lock"></i> Ver Documentación / Planos
             </a>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-3">
+            {% for prop in p.propietarios %}
+            <div class="col">
+                <div class="bg-secondary bg-opacity-25 p-3 rounded-3 border border-secondary h-100 shadow-sm">
+                    <p class="mb-1 fw-bold text-warning border-bottom border-secondary pb-1"><i class="bi bi-person-circle"></i> {{ prop.nombre }}</p>
+                    <p class="mb-1 small"><strong>DNI:</strong> {{ prop.dni or 'N/A' }}</p>
+                    <p class="mb-1 small"><strong>Teléfono:</strong> {{ prop.telefono }}</p>
+                    {% if prop.notas_legajo %}
+                    <p class="small text-light mb-0 mt-2 p-2 rounded bg-black bg-opacity-25 border-start border-warning" style="font-style: italic;">
+                      {{ prop.notas_legajo }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center py-3 text-muted">No hay propietarios registrados.</div>
+            {% endfor %}
         </div>
       </div>
     </div>
@@ -213,7 +206,7 @@
       btn.innerHTML = '<i class="bi bi-check2"></i> ¡Copiado!';
       btn.classList.replace("btn-outline-dark", "btn-success");
       setTimeout(() => {
-        btn.innerHTML = '<i class="bi bi-link-45deg"></i> Copiar';
+        btn.innerHTML = '<i class="bi bi-link-45deg"></i> Copiar Link';
         btn.classList.replace("btn-success", "btn-outline-dark");
       }, 2000);
     });
