@@ -1,0 +1,30 @@
+<div class="row mb-4">
+    <div class="col-md-6">
+        <label class="form-label fw-bold text-success small">Galería de Imágenes</label>
+        {% if p %}
+        <div class="d-flex flex-wrap gap-2 mb-2">
+            {% for archivo in p.archivos if archivo.tipo == 'imagen' %}
+            <div class="position-relative">
+                <img src="{{ url_for('static', filename='uploads/' + archivo.archivo_nombre) }}" class="rounded border" style="width: 60px; height: 60px; object-fit: cover">
+                <button type="button" onclick="borrarArchivoAjax(this, '{{ archivo.id }}')" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" style="width:18px; height:18px;">×</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="upload-zone" onclick="document.getElementById('imagenesInput').click()">
+            <i class="bi bi-camera fs-2"></i>
+            <p class="small mb-0">Subir fotos</p>
+        </div>
+        <input type="file" name="imagenes" id="imagenesInput" class="d-none" accept="image/*" multiple onchange="handleFileSelect(this, 'lista-imagenes', 'foto')" />
+        <div id="lista-imagenes" class="d-flex flex-wrap gap-2 mt-2"></div>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label fw-bold text-success small">Videos</label>
+        <div class="upload-zone" onclick="document.getElementById('videosInput').click()">
+            <i class="bi bi-play-btn fs-2"></i>
+        </div>
+        <input type="file" name="videos" id="videosInput" class="d-none" accept="video/*" multiple onchange="handleFileSelect(this, 'lista-videos', 'video')" />
+        <div id="lista-videos" class="d-flex flex-wrap gap-2 mt-2"></div>
+    </div>
+</div>

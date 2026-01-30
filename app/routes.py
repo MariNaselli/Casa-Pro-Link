@@ -1,19 +1,14 @@
 from flask import flash, render_template, request, redirect, url_for, current_app as app
-from .models import Propiedad, Multimedia, db, Usuario, Propietario
+from .models import Propiedad, Multimedia, db, Usuario, Propietario, Barrio, TipoPropiedad, TipoOperacion
 from sqlalchemy.orm import joinedload
 from flask_login import login_user, logout_user, login_required, current_user 
 from .utils import guardar_archivo_multimedia
 import os
-import uuid
-from werkzeug.utils import secure_filename
 
 @app.route('/admin')
 def admin():
-    # Si ya inició sesión, lo mandamos al home (donde verá sus botones)
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-    
-    # Si no está logueado, lo mandamos directo al login
     return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -26,7 +21,7 @@ def login():
             login_user(user)
             return redirect(url_for('home'))
         flash('Usuario o contraseña incorrectos', 'danger')
-    return render_template('login.html')
+    return render_template('admin/login.html') # Ruta actualizada
 
 @app.route('/logout')
 @login_required
@@ -46,19 +41,47 @@ def home():
         lista_propiedades = Propiedad.query.options(joinedload(Propiedad.archivos)).filter_by(activo=True).all()
     return render_template('index.html', propiedades=lista_propiedades, busqueda=query)
 
+# --- RUTAS PÚBLICAS ---
+
+@app.route('/')
+def home():
+    query = request.args.get('q', '')
+    if query.strip():
+        # Filtramos por texto en título o calle, y buscamos en la relación de barrio
+        lista_propiedades = Propiedad.query.options(joinedload(Propiedad.archivos)).join(Barrio).filter(
+            Propiedad.activo == True,
+            (Propiedad.titulo.contains(query) | Propiedad.calle.contains(query) | Barrio.nombre.contains(query))
+        ).all()
+    else:
+        lista_propiedades = Propiedad.query.options(joinedload(Propiedad.archivos)).filter_by(activo=True).all()
+    
+    return render_template('public/index.html', propiedades=lista_propiedades, busqueda=query) # Ruta actualizada
+
+@app.route('/propiedad/<int:id>')
+def ficha(id):
+    propiedad = Propiedad.query.get_or_404(id)
+    if not propiedad.activo and not current_user.is_authenticated:
+        flash("Esta propiedad ya no está disponible.", "info")
+        return redirect(url_for('home'))
+    return render_template('public/ficha.html', p=propiedad) # Ruta actualizada
+
+# --- GESTIÓN DE PROPIEDADES (ADMIN) ---
+
 @app.route('/cargar', methods=['GET', 'POST'])
 @login_required
 def cargar():
     if request.method == 'POST':
         nueva_propiedad = Propiedad(
             titulo=request.form.get('titulo'),
-            precio=request.form.get('precio'),
-            moneda=request.form.get('moneda'),
-            operacion=request.form.get('operacion'),
+            descripcion=request.form.get('descripcion'),
+            tipo_id=request.form.get('tipo_id'),           # Usamos ID
+            operacion_id=request.form.get('operacion_id'), # Usamos ID
+            barrio_id=request.form.get('barrio_id'),       # Usamos ID
+            localidad=request.form.get('localidad'),
             calle=request.form.get('calle'),
             altura=request.form.get('altura'),
-            barrio=request.form.get('barrio'),
-            descripcion=request.form.get('descripcion'), 
+            precio=request.form.get('precio'),
+            moneda=request.form.get('moneda'),
             m2_totales=request.form.get('m2_totales'),
             m2_cubiertos=request.form.get('m2_cubiertos'),
             dormitorios=request.form.get('dormitorios'),
@@ -68,25 +91,21 @@ def cargar():
             pileta=request.form.get('pileta') == 'on',
             quincho=request.form.get('quincho') == 'on',
             patio=request.form.get('patio') == 'on',
-            activo=True
+            activo=True,
+            estado='Disponible'
         )
         db.session.add(nueva_propiedad)
         db.session.flush() 
-
         _procesar_datos_adicionales(request, nueva_propiedad.id)
-
         db.session.commit()
         flash('Propiedad cargada con éxito', 'success')
         return redirect(url_for('home'))
-    return render_template('cargar.html')
 
-@app.route('/propiedad/<int:id>')
-def ficha(id):
-    propiedad = Propiedad.query.get_or_404(id)
-    if not propiedad.activo and not current_user.is_authenticated:
-        flash("Esta propiedad ya no está disponible.", "info")
-        return redirect(url_for('home'))
-    return render_template('ficha.html', p=propiedad)
+    # Para el GET: Enviamos todas las listas maestras
+    return render_template('admin/formulario.html', 
+                           tipos=TipoPropiedad.query.all(), 
+                           operaciones=TipoOperacion.query.all(), 
+                           barrios=Barrio.query.all())
 
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -94,33 +113,40 @@ def editar(id):
     p = Propiedad.query.get_or_404(id)
     if request.method == 'POST':
         p.titulo = request.form.get('titulo')
-        p.operacion = request.form.get('operacion')
+        p.descripcion = request.form.get('descripcion')
+        p.tipo_id = request.form.get('tipo_id')           # Corregido a ID
+        p.operacion_id = request.form.get('operacion_id') # Corregido a ID
+        p.barrio_id = request.form.get('barrio_id')       # Corregido a ID
         p.precio = request.form.get('precio')
         p.moneda = request.form.get('moneda')
+        p.localidad = request.form.get('localidad')
         p.calle = request.form.get('calle')
         p.altura = request.form.get('altura')
-        p.barrio = request.form.get('barrio')
         p.dormitorios = request.form.get('dormitorios')
         p.banios = request.form.get('banios')
         p.m2_totales = request.form.get('m2_totales')
         p.m2_cubiertos = request.form.get('m2_cubiertos')
-        p.descripcion = request.form.get('descripcion')
         p.mostrar_inmo = request.form.get('mostrar_inmo') == 'on'
         p.cochera = request.form.get('cochera') == 'on'
         p.pileta = request.form.get('pileta') == 'on'
         p.quincho = request.form.get('quincho') == 'on'
         p.patio = request.form.get('patio') == 'on'
 
-        # Actualizar Propietarios (Borrar y recrear para evitar duplicados)
+        # Limpiamos y recreamos propietarios para evitar líos
         Propietario.query.filter_by(propiedad_id=p.id).delete()
         _procesar_datos_adicionales(request, p.id)
 
         db.session.commit()
-        flash('¡Propiedad actualizada con éxito!', 'success')
+        flash('¡Propiedad actualizada!', 'success')
         return redirect(url_for('ficha', id=p.id))
-    return render_template('editar.html', p=p)
 
-# Función interna para no repetir código entre cargar y editar
+    return render_template('admin/formulario.html', p=p, 
+                           tipos=TipoPropiedad.query.all(), 
+                           operaciones=TipoOperacion.query.all(), 
+                           barrios=Barrio.query.all())
+
+# --- FUNCIONES DE APOYO Y OTROS ---
+
 def _procesar_datos_adicionales(request, propiedad_id):
     # 1. Propietarios
     data_propietarios = zip(
@@ -138,7 +164,7 @@ def _procesar_datos_adicionales(request, propiedad_id):
     mapeo = {'imagenes': 'imagen', 'videos': 'video', 'documentos': 'documento'}
     for input_name, tipo_db in mapeo.items():
         for f in request.files.getlist(input_name):
-            nombre = guardar_archivo_multimedia(f, tipo_folder=('documentos' if tipo_db == 'documento' else 'uploads'), optimizar=(tipo_db != 'video'))
+            nombre = guardar_archivo_multimedia(f, tipo_folder='uploads', optimizar=(tipo_db == 'imagen'))
             if nombre:
                 db.session.add(Multimedia(archivo_nombre=nombre, tipo=tipo_db, propiedad_id=propiedad_id))
 
@@ -160,7 +186,7 @@ def eliminar(id):
     p = Propiedad.query.get_or_404(id)
     p.activo = False 
     db.session.commit()
-    flash('Propiedad eliminada.', 'warning')
+    flash('Propiedad eliminada del catálogo.', 'warning')
     return redirect(url_for('home'))
 
 @app.route('/toggle_inmo/<int:id>', methods=['POST'])
@@ -176,4 +202,4 @@ def toggle_inmo(id):
 def ver_legajo(id):
     propiedad = Propiedad.query.get_or_404(id)
     documentos = [m for m in propiedad.archivos if m.tipo == 'documento']
-    return render_template('legajo.html', p=propiedad, documentos=documentos)
+    return render_template('admin/legajo.html', p=propiedad, documentos=documentos)

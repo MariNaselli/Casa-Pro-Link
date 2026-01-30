@@ -1,108 +1,33 @@
 <!doctype html>
 <html lang="es">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CasaProLink - {% block title %}{% endblock %}</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    />
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     
     <style>
-      .card-img-top {
-        height: 200px;
-        object-fit: cover;
-      }
-      body {
-        background-color: #f8f9fa;
-      }
+        body { background-color: #f8f9fa; }
+        .card-img-top { height: 200px; object-fit: cover; }
     </style>
-  </head>
-  <body>
-   
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-  <div class="container">
-    <a class="navbar-brand fw-bold text-primary" href="/">CasaProLink</a>
-    
-    <div class="ms-auto d-flex align-items-center">
-      {% if current_user.is_authenticated %}
-        <span class="text-muted small me-3 d-none d-md-inline">
-            <i class="bi bi-person-circle"></i> {{ current_user.username }}
-        </span>
-        <a href="{{ url_for('cargar') }}" class="btn btn-primary btn-sm me-2">
-            <i class="bi bi-plus"></i> Nueva Propiedad
-        </a>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Salir</a>
-      {% else %}
-        <a href="https://wa.me/TUNUMERO" class="btn btn-outline-success btn-sm">
-            <i class="bi bi-whatsapp"></i> Contactar
-        </a>
-      {% endif %}
-    </div>
-  </div>
-</nav>
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1085">
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %} {% for category, message in messages %}
-      <div
-        class="toast show align-items-center border-0 shadow-sm mb-2"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-        style="background-color: #f8f9fa"
-      >
-        <div class="d-flex">
-          <div class="toast-body d-flex align-items-center py-2 px-3">
-            {% if category == 'success' %}
-            <i class="bi bi-check-circle-fill text-success me-2"></i>
-            {% else %}
-            <i class="bi bi-info-circle-fill text-warning me-2"></i>
-            {% endif %}
-            <span class="small fw-medium text-dark">{{ message }}</span>
-          </div>
-          <button
-            type="button"
-            class="btn-close me-2 m-auto"
-            data-bs-dismiss="toast"
-            aria-label="Close"
-            style="font-size: 0.7rem"
-          ></button>
-        </div>
-      </div>
-      {% endfor %} {% endif %} {% endwith %}
-    </div>
+    {% block extra_css %}{% endblock %}
+</head>
 
+<body>
+    {% include 'includes/_navbar.html' %}
 
+    {% include 'includes/_toasts.html' %}
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const toasts = document.querySelectorAll(".toast");
-        toasts.forEach(function (t) {
-          setTimeout(function () {
-            t.classList.remove("show");
-            // Opcional: eliminar del DOM después de la animación
-            setTimeout(() => t.remove(), 500);
-          }, 3000); // 
-        });
-      });
-    </script>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 
-    <main>{% block content %} {% endblock %}</main>
+    {% include 'includes/_footer.html' %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
-  <footer class="py-4 mt-5 border-top bg-light text-center">
-  <div class="container">
-    <p class="text-muted small mb-0">&copy; 2026 Inmobiliaria Hermano</p>
     
-    {% if not current_user.is_authenticated %}
-      <a href="{{ url_for('admin') }}" class="text-decoration-none text-secondary" style="font-size: 10px; opacity: 0.3;">Acceso</a>
-    {% endif %}
-  </div>
-</footer>
+    {% block scripts %}{% endblock %}
+</body>
 </html>

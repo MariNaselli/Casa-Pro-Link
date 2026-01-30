@@ -1,0 +1,13 @@
+<div class="d-flex gap-2">
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('editar', id=p.id) }}" class="text-primary" title="Editar">
+            <i class="bi bi-pencil"></i>
+        </a>
+        <a href="#" class="text-danger" title="Eliminar" data-bs-toggle="modal" data-bs-target="#modalEliminar" onclick="prepararEliminar('{{ url_for('eliminar', id=p.id) }}')">
+            <i class="bi bi-trash"></i>
+        </a>
+    {% endif %}
+    <a href="#" class="text-success" title="Compartir WhatsApp" onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')">
+        <i class="bi bi-whatsapp"></i>
+    </a>
+</div>

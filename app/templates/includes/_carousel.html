@@ -1,0 +1,56 @@
+{% set fotos = p.archivos | selectattr('tipo', 'equalto', 'imagen') | list %} 
+{% set videos = p.archivos | selectattr('tipo', 'equalto', 'video') | list %} 
+{% set lista_ordenada = fotos + videos %}
+
+<div id="carouselPropiedad" class="carousel slide rounded-4 overflow-hidden shadow-lg border bg-dark">
+    <div class="carousel-indicators">
+        {% for archivo in lista_ordenada %}
+            <button type="button" data-bs-target="#carouselPropiedad" data-bs-slide-to="{{ loop.index0 }}" 
+                    class="{{ 'active' if loop.first }}" aria-current="true"></button>
+        {% endfor %}
+    </div>
+
+    <div class="carousel-inner">
+        {% for archivo in lista_ordenada %}
+        <div class="carousel-item {{ 'active' if loop.first }}">
+            {% if archivo.tipo == 'imagen' %}
+                <img src="{{ url_for('static', filename='uploads/' + archivo.archivo_nombre) }}" 
+                     class="d-block w-100 carousel-img" alt="Foto de {{ p.titulo }}" />
+            {% elif archivo.tipo == 'video' %}
+                <div class="video-container">
+                    <video class="w-100 h-100" controls preload="metadata">
+                        <source src="{{ url_for('static', filename='uploads/' + archivo.archivo_nombre) }}" type="video/mp4" />
+                        Tu navegador no soporta videos.
+                    </video>
+                </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if lista_ordenada|length > 1 %}
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselPropiedad" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselPropiedad" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+    {% endif %}
+</div>
+
+<style>
+    /* Esto es CLAVE para la prolijidad visual */
+    .carousel-img, .video-container {
+        height: 500px; /* Altura fija para que la página no salte */
+        object-fit: cover; /* La foto se adapta sin deformarse */
+    }
+    .video-container {
+        background: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    @media (max-width: 768px) {
+        .carousel-img, .video-container { height: 300px; } /* Más chico en celular */
+    }
+</style>

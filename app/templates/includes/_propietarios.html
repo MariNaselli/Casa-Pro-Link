@@ -1,0 +1,28 @@
+<div class="card border-dark mb-4 shadow-sm overflow-hidden">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 fw-bold"><i class="bi bi-shield-lock"></i> Legajo Interno (Privado)</h6>
+        <button type="button" class="btn btn-sm btn-outline-light" onclick="agregarPropietario()">+ Agregar Dueño</button>
+    </div>
+    <div class="card-body bg-light" id="contenedor-propietarios">
+        {% if p %}
+            {% for prop in p.propietarios %}
+                <div class="row mb-3 propietario-fila border-bottom pb-3 mt-2">
+                    <div class="col-md-4 mb-2"><label class="small fw-bold">Nombre</label><input type="text" name="propietario_nombre[]" class="form-control form-control-sm" value="{{ prop.nombre }}"></div>
+                    <div class="col-md-3 mb-2"><label class="small fw-bold">Teléfono</label><input type="text" name="propietario_tel[]" class="form-control form-control-sm" value="{{ prop.telefono }}"></div>
+                    <div class="col-md-2 mb-2"><label class="small fw-bold">DNI</label><input type="text" name="propietario_dni[]" class="form-control form-control-sm" value="{{ prop.dni }}"></div>
+                    <div class="col-md-2 mb-2"><label class="small fw-bold">E-mail</label><input type="email" name="propietario_email[]" class="form-control form-control-sm" value="{{ prop.email }}"></div>
+                    <div class="col-md-11 mb-2"><textarea name="notas_legajo[]" class="form-control form-control-sm" rows="1">{{ prop.notas_legajo }}</textarea></div>
+                    <div class="col-md-1 d-flex align-items-center justify-content-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.propietario-fila').remove()"><i class="bi bi-trash"></i></button></div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="card-footer bg-white border-top">
+        <label class="form-label fw-bold text-danger small">Documentación Privada (PDF/Planos)</label>
+        <div class="upload-zone py-3" onclick="document.getElementById('docsInput').click()">
+            <i class="bi bi-file-earmark-pdf fs-4"></i> Subir archivos privados
+        </div>
+        <input type="file" name="documentos" id="docsInput" class="d-none" accept=".pdf,image/*" multiple onchange="handleFileSelect(this, 'lista-docs', 'doc')" />
+        <div id="lista-docs" class="mt-2 d-flex flex-wrap gap-2"></div>
+    </div>
+</div>

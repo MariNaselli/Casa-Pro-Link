@@ -1,0 +1,33 @@
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1085">
+    {% with messages = get_flashed_messages(with_categories=true) %} 
+        {% if messages %} 
+            {% for category, message in messages %}
+                <div class="toast show align-items-center border-0 shadow-sm mb-2" role="alert" style="background-color: #f8f9fa">
+                    <div class="d-flex">
+                        <div class="toast-body d-flex align-items-center py-2 px-3">
+                            {% if category == 'success' %}
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill text-warning me-2"></i>
+                            {% endif %}
+                            <span class="small fw-medium text-dark">{{ message }}</span>
+                        </div>
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" style="font-size: 0.7rem"></button>
+                    </div>
+                </div>
+            {% endfor %} 
+        {% endif %} 
+    {% endwith %}
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toasts = document.querySelectorAll(".toast");
+        toasts.forEach(function (t) {
+            setTimeout(function () {
+                t.classList.remove("show");
+                setTimeout(() => t.remove(), 500);
+            }, 3000);
+        });
+    });
+</script>

@@ -1,0 +1,8 @@
+<footer class="py-4 mt-5 border-top bg-light text-center">
+    <div class="container">
+        <p class="text-muted small mb-0">&copy; 2026 Inmobiliaria Hermano</p>
+        {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('admin') }}" class="text-decoration-none text-secondary" style="font-size: 10px; opacity: 0.3;">Acceso</a>
+        {% endif %}
+    </div>
+</footer>

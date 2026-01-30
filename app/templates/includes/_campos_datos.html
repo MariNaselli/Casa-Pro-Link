@@ -1,0 +1,94 @@
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label class="form-label fw-bold small">Título de la Publicación</label>
+        <input type="text" name="titulo" class="form-control" value="{{ p.titulo if p else '' }}" placeholder="Ej: Departamento 1 dorm." required />
+    </div>
+    <div class="col-md-3 mb-3">
+        <label class="form-label fw-bold small text-primary">Tipo de Propiedad</label>
+        <select name="tipo_id" class="form-select border-primary shadow-sm" required>
+            <option value="">Seleccionar...</option>
+            {% for t in tipos %}
+            <option value="{{ t.id }}" {% if p and p.tipo_id == t.id %}selected{% endif %}>{{ t.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3 mb-3">
+        <label class="form-label fw-bold small">Operación</label>
+        <select name="operacion_id" class="form-select" required>
+            <option value="">Seleccionar...</option>
+            {% for o in operaciones %}
+            <option value="{{ o.id }}" {% if p and p.operacion_id == o.id %}selected{% endif %}>{{ o.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <label class="form-label fw-bold small">Precio</label>
+        <div class="input-group">
+            <select name="moneda" class="form-select" style="max-width: 85px">
+                <option value="USD" {% if p and p.moneda == 'USD' %}selected{% endif %}>USD</option>
+                <option value="ARS" {% if p and p.moneda == 'ARS' %}selected{% endif %}>ARS</option>
+            </select>
+            <input type="number" name="precio" class="form-control" value="{{ p.precio if p else '' }}" required />
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <label class="form-label fw-bold small text-primary">Barrio</label>
+        <select name="barrio_id" class="form-select border-primary" required>
+            <option value="">Seleccionar barrio...</option>
+            {% for b in barrios %}
+            <option value="{{ b.id }}" {% if p and p.barrio_id == b.id %}selected{% endif %}>{{ b.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-4 mb-3">
+        <label class="form-label fw-bold small">Calle</label>
+        <input type="text" name="calle" class="form-control" value="{{ p.calle if p else '' }}" />
+    </div>
+    <div class="col-md-2 mb-3">
+        <label class="form-label fw-bold small">Altura</label>
+        <input type="text" name="altura" class="form-control" value="{{ p.altura if p else '' }}" />
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-2 mb-3">
+        <label class="form-label fw-bold small">Dormitorios</label>
+        <input type="number" name="dormitorios" class="form-control" value="{{ p.dormitorios if p else 0 }}" />
+    </div>
+    <div class="col-md-2 mb-3">
+        <label class="form-label fw-bold small">Baños</label>
+        <input type="number" name="banios" class="form-control" value="{{ p.banios if p else 0 }}" />
+    </div>
+    <div class="col-md-4 mb-3">
+        <label class="form-label fw-bold small">M2 Totales</label>
+        <input type="number" name="m2_totales" class="form-control" value="{{ p.m2_totales if p else '' }}" />
+    </div>
+    <div class="col-md-4 mb-3">
+        <label class="form-label fw-bold small text-primary">M2 Cubiertos</label>
+        <input type="number" name="m2_cubiertos" class="form-control" value="{{ p.m2_cubiertos if p else '' }}" />
+    </div>
+</div>
+
+<div class="mb-4">
+    <label class="form-label fw-bold text-secondary small">Comodidades</label>
+    <div class="d-flex flex-wrap gap-3 p-3 border rounded bg-light">
+        {% for item_id, icono in [('cochera','car-front'), ('pileta','water'), ('quincho','fire'), ('patio','tree')] %}
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="{{ item_id }}" id="{{ item_id }}" 
+            {% if p and p[item_id] %}checked{% endif %} />
+            <label class="form-check-label" for="{{ item_id }}"><i class="bi bi-{{ icono }}"></i> {{ item_id|capitalize }}</label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="mb-4">
+    <label class="form-label fw-bold text-primary small">Descripción Pública</label>
+    <div id="editor-container" style="height: 250px; background: white" class="rounded-bottom">
+        {{ p.descripcion|safe if p else '' }}
+    </div>
+    <input type="hidden" name="descripcion" id="descripcion_input" />
+</div>

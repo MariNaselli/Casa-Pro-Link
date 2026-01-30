@@ -6,30 +6,43 @@ from flask import current_app
 
 def guardar_archivo_multimedia(file, tipo_folder='uploads', optimizar=False):
     """
-    Lógica única para procesar cualquier archivo.
-    Devuelve el nombre único del archivo guardado.
+    Procesa fotos, videos y documentos.
+    Crea la carpeta si no existe y optimiza imágenes si se solicita.
     """
     if not file or file.filename == '':
         return None
     
+    # 1. Limpiamos el nombre original y creamos uno único
     filename = secure_filename(file.filename)
-    # Agregamos prefijo DOC para legajos si queremos orden visual en la carpeta
-    prefix = "DOC_" if tipo_folder == 'documentos' else "" 
-    nombre_unico = f"{prefix}{uuid.uuid4().hex}_{filename}"
+    nombre_unico = f"{uuid.uuid4().hex}_{filename}"
     
-    ruta = os.path.join(current_app.static_folder, 'uploads', nombre_unico)
-    file.save(ruta)
+    # 2. Definimos la ruta de la carpeta (uploads o documentos)
+    # Usamos la variable tipo_folder que viene por parámetro
+    folder_path = os.path.join(current_app.static_folder, tipo_folder)
+    
+    # 3. SEGURIDAD: Si la carpeta no existe, la creamos
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    
+    # 4. Ruta final completa del archivo
+    ruta_final = os.path.join(folder_path, nombre_unico)
+    file.save(ruta_final)
 
+    # 5. Optimización de imágenes (solo si es imagen y se pide optimizar)
     if optimizar:
         extension = nombre_unico.lower().split('.')[-1]
-        if extension in ['jpg', 'jpeg', 'png']:
+        if extension in ['jpg', 'jpeg', 'png', 'webp']:
             try:
-                with Image.open(ruta) as img:
+                with Image.open(ruta_final) as img:
                     if img.mode != 'RGB':
                         img = img.convert('RGB')
-                    img.thumbnail((1200, 1200)) # Redimensiona manteniendo proporción
-                    img.save(ruta, "JPEG", optimize=True, quality=75)
+                    
+                    # Redimensionamos a un tamaño máximo razonable (Full HD aprox)
+                    img.thumbnail((1600, 1600)) 
+                    
+                    # Guardamos comprimiendo para que la web vuele
+                    img.save(ruta_final, "JPEG", optimize=True, quality=80)
             except Exception as e:
-                print(f"Error optimizando {nombre_unico}: {e}")
+                print(f"Error optimizando imagen: {e}")
                 
     return nombre_unico

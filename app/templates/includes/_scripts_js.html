@@ -1,0 +1,66 @@
+<style>
+    .upload-zone { border: 2px dashed #dee2e6; border-radius: 12px; padding: 20px; text-align: center; background: #f8f9fa; cursor: pointer; transition: 0.3s; }
+    .upload-zone:hover { border-color: #0d6efd; background: #f0f7ff; color: #0d6efd; }
+    .preview-item { width: 90px; position: relative; }
+    .preview-item img, .preview-item .icon-box { height: 80px; width: 90px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+    .btn-remove { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; line-height: 1; }
+</style>
+
+<script>
+    // Borrado AJAX de archivos existentes
+    function borrarArchivoAjax(boton, archivoId) {
+        if(!confirm("¿Borrar permanentemente?")) return;
+        fetch(`/borrar_archivo/${archivoId}`, { method: "POST" }).then(res => {
+            if (res.ok) boton.closest(".position-relative").remove();
+        });
+    }
+
+    const fileStores = { foto: new DataTransfer(), video: new DataTransfer(), doc: new DataTransfer() };
+    function handleFileSelect(input, containerId, type) {
+        const store = fileStores[type];
+        for (let file of input.files) { store.items.add(file); }
+        input.files = store.files;
+        renderPreviews(containerId, type, input.id);
+    }
+
+    function renderPreviews(containerId, type, inputId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        Array.from(fileStores[type].files).forEach((file, index) => {
+            const div = document.createElement("div");
+            div.className = "preview-item";
+            div.innerHTML = `<img src="${URL.createObjectURL(file)}">
+                             <button type="button" onclick="removeFile('${type}', ${index}, '${containerId}', '${inputId}')" class="btn btn-danger btn-remove">×</button>`;
+            container.appendChild(div);
+        });
+    }
+
+    function removeFile(type, index, containerId, inputId) {
+        const newStore = new DataTransfer();
+        Array.from(fileStores[type].files).forEach((f, i) => { if (i !== index) newStore.items.add(f); });
+        fileStores[type] = newStore;
+        document.getElementById(inputId).files = newStore.files;
+        renderPreviews(containerId, type, inputId);
+    }
+
+    // Inicializar Quill
+    var quill = new Quill("#editor-container", { theme: "snow" });
+    document.getElementById("propiedadForm").onsubmit = () => { 
+        document.getElementById("descripcion_input").value = quill.root.innerHTML; 
+    };
+
+    function agregarPropietario() {
+        const div = document.createElement("div");
+        div.className = "row mb-3 propietario-fila border-bottom pb-3 mt-2";
+        div.innerHTML = `
+            <div class="col-md-4 mb-2"><label class="small fw-bold">Nombre</label><input type="text" name="propietario_nombre[]" class="form-control form-control-sm" required></div>
+            <div class="col-md-3 mb-2"><label class="small fw-bold">Teléfono</label><input type="text" name="propietario_tel[]" class="form-control form-control-sm"></div>
+            <div class="col-md-2 mb-2"><label class="small fw-bold">DNI</label><input type="text" name="propietario_dni[]" class="form-control form-control-sm"></div>
+            <div class="col-md-2 mb-2"><label class="small fw-bold">E-mail</label><input type="email" name="propietario_email[]" class="form-control form-control-sm"></div>
+            <div class="col-md-11 mb-2"><textarea name="notas_legajo[]" class="form-control form-control-sm" rows="1" placeholder="Notas privadas..."></textarea></div>
+            <div class="col-md-1 d-flex align-items-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.propietario-fila').remove()">×</button></div>`;
+        document.getElementById("contenedor-propietarios").appendChild(div);
+    }
+
+    {% if not p %} window.onload = agregarPropietario; {% endif %}
+</script>
