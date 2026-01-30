@@ -29,18 +29,6 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/')
-def home():
-    query = request.args.get('q', '')
-    if query.strip():
-        lista_propiedades = Propiedad.query.options(joinedload(Propiedad.archivos)).filter(
-            Propiedad.activo == True,
-            (Propiedad.titulo.contains(query) | Propiedad.calle.contains(query) | Propiedad.barrio.contains(query))
-        ).all()
-    else:
-        lista_propiedades = Propiedad.query.options(joinedload(Propiedad.archivos)).filter_by(activo=True).all()
-    return render_template('index.html', propiedades=lista_propiedades, busqueda=query)
-
 # --- RUTAS PÚBLICAS ---
 
 @app.route('/')
@@ -193,7 +181,7 @@ def eliminar(id):
 @login_required
 def toggle_inmo(id):
     p = Propiedad.query.get_or_404(id)
-    p.mostrar_inmo = not p.mostrar_inmo
+    p.mostrar_inmo = not p.mostrar_inmo # Si estaba en True, pasa a False y viceversa
     db.session.commit()
     return {"status": "success", "nuevo_estado": p.mostrar_inmo}
 

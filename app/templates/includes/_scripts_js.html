@@ -24,16 +24,30 @@
     }
 
     function renderPreviews(containerId, type, inputId) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        Array.from(fileStores[type].files).forEach((file, index) => {
-            const div = document.createElement("div");
-            div.className = "preview-item";
-            div.innerHTML = `<img src="${URL.createObjectURL(file)}">
-                             <button type="button" onclick="removeFile('${type}', ${index}, '${containerId}', '${inputId}')" class="btn btn-danger btn-remove">×</button>`;
-            container.appendChild(div);
-        });
-    }
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    Array.from(fileStores[type].files).forEach((file, index) => {
+        const div = document.createElement("div");
+        div.className = "preview-item";
+        
+        // Si es foto, mostramos miniatura. Si es video o doc, mostramos ícono.
+        let content = "";
+        if (type === 'foto') {
+            content = `<img src="${URL.createObjectURL(file)}" style="width: 90px; height: 80px; object-fit: cover; border-radius: 8px;">`;
+        } else {
+            let icon = type === 'video' ? 'bi-play-circle-fill' : 'bi-file-earmark-pdf-fill';
+            let color = type === 'video' ? 'text-primary' : 'text-danger';
+            content = `<div class="icon-box border rounded bg-white d-flex align-items-center justify-content-center" style="height: 80px; width: 90px;">
+                        <i class="bi ${icon} ${color} fs-2"></i>
+                       </div>`;
+        }
+
+        div.innerHTML = `${content}
+            <button type="button" onclick="removeFile('${type}', ${index}, '${containerId}', '${inputId}')" class="btn btn-danger btn-remove shadow-sm">×</button>
+            <div class="small text-truncate text-center mt-1" style="font-size: 10px; width: 90px;">${file.name}</div>`;
+        container.appendChild(div);
+    });
+}
 
     function removeFile(type, index, containerId, inputId) {
         const newStore = new DataTransfer();
