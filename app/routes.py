@@ -4,6 +4,8 @@ from sqlalchemy.orm import joinedload
 from flask_login import login_user, logout_user, login_required, current_user 
 from .utils import guardar_archivo_multimedia, generar_slug
 import os
+from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
 
 @app.route('/admin')
 def admin():
@@ -31,19 +33,59 @@ def logout():
 
 # --- RUTAS PÚBLICAS ---
 
+from sqlalchemy import or_
+
 @app.route('/')
 def home():
-    query = request.args.get('q', '')
-    if query.strip():
-        # Filtramos por texto en título o calle, y buscamos en la relación de barrio
-        lista_propiedades = Propiedad.query.options(joinedload(Propiedad.archivos)).join(Barrio).filter(
-            Propiedad.activo == True,
-            (Propiedad.titulo.contains(query) | Propiedad.calle.contains(query) | Barrio.nombre.contains(query))
-        ).all()
-    else:
-        lista_propiedades = Propiedad.query.options(joinedload(Propiedad.archivos)).filter_by(activo=True).all()
+    # 1. Capturamos los filtros
+    ubicacion_buscada = request.args.get('ubicacion', '').strip()
+    query_admin = request.args.get('q', '').strip()
+    tipo_id = request.args.get('tipo')
+    operacion_id = request.args.get('operacion')
+
+    # 2. Consulta Base (Outerjoin para incluir casas sin barrio asignado)
+    p_query = Propiedad.query.outerjoin(Barrio).filter(Propiedad.activo == True)
+
+    # 3. Filtro de Ubicación (Busca texto en Ciudad O Barrio)
+    if ubicacion_buscada:
+        p_query = p_query.filter(
+            or_(
+                Propiedad.localidad.ilike(f'%{ubicacion_buscada}%'),
+                Barrio.nombre.ilike(f'%{ubicacion_buscada}%')
+            )
+        )
+
+    # 4. Filtros del Admin y Selectores
+    if query_admin:
+        p_query = p_query.filter(
+            or_(
+                Propiedad.titulo.ilike(f'%{query_admin}%'),
+                Propiedad.calle.ilike(f'%{query_admin}%')
+            )
+        )
+    if tipo_id: p_query = p_query.filter(Propiedad.tipo_id == tipo_id)
+    if operacion_id: p_query = p_query.filter(Propiedad.operacion_id == operacion_id)
+
+    # 5. Ejecutamos la búsqueda
+    lista_propiedades = p_query.options(joinedload(Propiedad.archivos)).all()
+
+    # --- LÓGICA DE AUTOCOMPLETAR (SOLUCIÓN DEFINITIVA) ---
+    # Obtenemos solo los nombres (texto) de ciudades y barrios
+    ciudades_db = db.session.query(Propiedad.localidad).distinct().all()
+    nombres_ciudades = [c[0] for c in ciudades_db if c[0]]
     
-    return render_template('public/index.html', propiedades=lista_propiedades, busqueda=query) # Ruta actualizada
+    barrios_db = db.session.query(Barrio.nombre).distinct().all()
+    nombres_barrios = [b[0] for b in barrios_db if b[0]]
+    
+    # Unimos todo en una sola lista ordenada y sin duplicados
+    lista_sugerencias = sorted(list(set(nombres_ciudades + nombres_barrios)))
+
+    return render_template('public/index.html', 
+                           propiedades=lista_propiedades,
+                           sugerencias=lista_sugerencias, # <--- ESTA ES LA CLAVE
+                           tipos=TipoPropiedad.query.all(),
+                           operaciones=TipoOperacion.query.all(),
+                           busqueda=query_admin)
 
 @app.route('/propiedad/<slug>') # <--- Cambió de <int:id> a <slug>
 def ficha(slug): # <--- Ahora recibe el texto

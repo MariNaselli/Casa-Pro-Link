@@ -1,0 +1,49 @@
+<section class="d-flex align-items-center justify-content-center text-white text-center py-5" 
+         style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'); 
+                background-size: cover; background-position: center; min-height: 80vh; margin-top: -24px;">
+    
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-2">Encontrá tu próximo hogar</h1>
+        <p class="fs-5 mb-5 opacity-75">Explorá las mejores oportunidades</p>
+
+        <div class="bg-white p-2 p-md-3 rounded-pill shadow-lg mx-auto" style="max-width: 900px;">
+            <form action="{{ url_for('home') }}" method="GET" class="row g-0 align-items-center text-dark" autocomplete="off">
+                
+                <div class="col-md-3">
+                    <select name="operacion" class="form-select border-0 shadow-none bg-transparent">
+                        <option value="">¿Venta o Alquiler?</option>
+                        {% for op in operaciones %}
+                        <option value="{{ op.id }}" {% if request.args.get('operacion') == op.id|string %}selected{% endif %}>{{ op.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3 border-start">
+                    <select name="tipo" class="form-select border-0 shadow-none bg-transparent">
+                        <option value="">¿Qué tipo?</option>
+                        {% for t in tipos %}
+                        <option value="{{ t.id }}" {% if request.args.get('tipo') == t.id|string %}selected{% endif %}>{{ t.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4 border-start px-3 position-relative">
+                    <input type="text" id="inputUbicacion" name="ubicacion"
+                           class="form-control border-0 shadow-none bg-transparent" 
+                           placeholder="Ciudad o Barrio (Escribí para buscar...)"
+                           value="{{ request.args.get('ubicacion', '') }}">
+                    
+                    <div id="menuSugerencias" class="list-group position-absolute start-0 w-100 mt-2 shadow-lg border-0 rounded-3 overflow-hidden d-none" 
+                         style="z-index: 1000; max-height: 250px; overflow-y: auto;">
+                         </div>
+                </div>
+
+                <div class="col-md-2 p-1">
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
