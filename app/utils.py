@@ -46,3 +46,13 @@ def guardar_archivo_multimedia(file, tipo_folder='uploads', optimizar=False):
                 print(f"Error optimizando imagen: {e}")
                 
     return nombre_unico
+
+import re
+import unicodedata
+
+def generar_slug(texto):
+    # Pasa a minúsculas y normaliza acentos
+    texto = unicodedata.normalize('NFKD', texto).encode('ascii', 'ignore').decode('utf-8').lower()
+    # Quita caracteres que no sean letras o números y reemplaza espacios por guiones
+    slug = re.sub(r'[^a-z0-9]+', '-', texto).strip('-')
+    return slug

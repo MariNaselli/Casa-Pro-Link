@@ -27,6 +27,7 @@ class Propiedad(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.Text)
+    slug = db.Column(db.String(255), unique=True, nullable=True)
     
     # Reemplazamos los Strings por ForeignKeys (IDs)
     tipo_id = db.Column(db.Integer, db.ForeignKey('tipo_propiedad.id'))

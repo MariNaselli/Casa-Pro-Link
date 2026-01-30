@@ -2,7 +2,7 @@ from flask import flash, render_template, request, redirect, url_for, current_ap
 from .models import Propiedad, Multimedia, db, Usuario, Propietario, Barrio, TipoPropiedad, TipoOperacion
 from sqlalchemy.orm import joinedload
 from flask_login import login_user, logout_user, login_required, current_user 
-from .utils import guardar_archivo_multimedia
+from .utils import guardar_archivo_multimedia, generar_slug
 import os
 
 @app.route('/admin')
@@ -45,22 +45,28 @@ def home():
     
     return render_template('public/index.html', propiedades=lista_propiedades, busqueda=query) # Ruta actualizada
 
-@app.route('/propiedad/<int:id>')
-def ficha(id):
-    propiedad = Propiedad.query.get_or_404(id)
+@app.route('/propiedad/<slug>') # <--- Cambió de <int:id> a <slug>
+def ficha(slug): # <--- Ahora recibe el texto
+    # Buscamos en la base de datos la propiedad que tenga ese slug
+    propiedad = Propiedad.query.filter_by(slug=slug).first_or_404()
+    
     if not propiedad.activo and not current_user.is_authenticated:
         flash("Esta propiedad ya no está disponible.", "info")
         return redirect(url_for('home'))
-    return render_template('public/ficha.html', p=propiedad) # Ruta actualizada
-
+        
+    return render_template('public/ficha.html', p=propiedad)
 # --- GESTIÓN DE PROPIEDADES (ADMIN) ---
 
 @app.route('/cargar', methods=['GET', 'POST'])
 @login_required
 def cargar():
     if request.method == 'POST':
+        # 1. Generamos el slug a partir del título
+        txt_titulo = request.form.get('titulo')
+        nuevo_slug = generar_slug(txt_titulo)
         nueva_propiedad = Propiedad(
             titulo=request.form.get('titulo'),
+            slug=nuevo_slug,
             descripcion=request.form.get('descripcion'),
             tipo_id=request.form.get('tipo_id'),           # Usamos ID
             operacion_id=request.form.get('operacion_id'), # Usamos ID
@@ -126,7 +132,7 @@ def editar(id):
 
         db.session.commit()
         flash('¡Propiedad actualizada!', 'success')
-        return redirect(url_for('ficha', id=p.id))
+        return redirect(url_for('ficha', slug=p.slug))
 
     return render_template('admin/formulario.html', p=p, 
                            tipos=TipoPropiedad.query.all(), 
