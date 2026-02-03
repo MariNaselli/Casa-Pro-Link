@@ -1,10 +1,15 @@
-<div class="d-flex align-items-center gap-3">
-    <a href="{{ url_for('ficha', slug=p.slug) }}" class="btn btn-sm btn-primary rounded-pill px-3" title="Ver Ficha Completa">
-        Ver detalle
-    </a>
+<div class="d-flex align-items-center gap-2 w-100">
+    
+    {# 1. BOTÓN VER DETALLE: Solo se muestra si NO estamos en la ficha #}
+    {% if request.endpoint != 'ficha' %}
+        <a href="{{ url_for('ficha', slug=p.slug) }}" class="btn btn-sm btn-primary rounded-pill px-3 flex-grow-1 text-center" title="Ver Ficha Completa">
+            Ver detalle
+        </a>
+    {% endif %}
 
+    {# 2. ACCIONES DE ADMIN: Se muestran siempre que esté logueado #}
     {% if current_user.is_authenticated %}
-        <div class="d-flex gap-2 border-start ps-2">
+        <div class="d-flex gap-2 {% if request.endpoint != 'ficha' %}border-start ps-2{% endif %}">
             <a href="{{ url_for('editar', id=p.id) }}" class="text-primary fs-5" title="Editar">
                 <i class="bi bi-pencil"></i>
             </a>
@@ -21,8 +26,11 @@
         </div>
     {% endif %}
 
-    <a href="#" class="text-success fs-5 ms-auto" title="Compartir por WhatsApp" 
-       onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')">
-        <i class="bi bi-whatsapp"></i>
-    </a>
+    {# 3. BOTÓN COMPARTIR (WHATSAPP ADMIN): Solo se muestra en la Ficha para el Admin #}
+    {% if request.endpoint == 'ficha' and current_user.is_authenticated %}
+        <a href="#" class="text-success fs-5 ms-auto" title="Compartir Ficha con Cliente" 
+           onclick="compartirWhatsApp('{{ p.titulo }}', '{{ p.id }}')">
+            <i class="bi bi-share"></i>
+        </a>
+    {% endif %}
 </div>
