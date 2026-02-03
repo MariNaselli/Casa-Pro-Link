@@ -6,44 +6,66 @@
         <h1 class="display-4 fw-bold mb-2">Encontrá tu próximo hogar</h1>
         <p class="fs-5 mb-5 opacity-75">Explorá las mejores oportunidades</p>
 
-        <div class="bg-white p-2 p-md-3 rounded-pill shadow-lg mx-auto" style="max-width: 900px;">
-            <form action="{{ url_for('home') }}" method="GET" class="row g-0 align-items-center text-dark" autocomplete="off">
+        <div class="bg-white p-3 rounded-4 shadow-lg mx-auto" style="max-width: 900px;">
+            <form id="heroForm" action="{{ url_for('home') }}" method="GET" class="row g-2 align-items-center text-dark" autocomplete="off">
                 
-                <div class="col-md-3">
-                    <select name="operacion" class="form-select border-0 shadow-none bg-transparent">
-                        <option value="">¿Venta o Alquiler?</option>
+                <div class="col-12 col-md-3 dropdown border-end-md">
+                    <button class="btn btn-light w-100 border-0 bg-transparent dropdown-toggle text-start py-2" type="button" id="btnOp" data-bs-toggle="dropdown">
+                        <span class="text-muted small d-block" style="font-size: 10px;">OPERACIÓN</span>
+                        <span id="labelOp">¿Qué buscás?</span>
+                    </button>
+                    <input type="hidden" name="operacion" id="inputOp" value="{{ request.args.get('operacion', '') }}">
+                    <ul class="dropdown-menu shadow-lg border-0 w-100 mt-2">
+                        <li><a class="dropdown-item py-2" href="#" onclick="seleccionarFiltro('Op', '', '¿Qué buscás?')">Cualquiera</a></li>
                         {% for op in operaciones %}
-                        <option value="{{ op.id }}" {% if request.args.get('operacion') == op.id|string %}selected{% endif %}>{{ op.nombre }}</option>
+                        <li><a class="dropdown-item py-2" href="#" onclick="seleccionarFiltro('Op', '{{ op.id }}', '{{ op.nombre }}')">{{ op.nombre }}</a></li>
                         {% endfor %}
-                    </select>
+                    </ul>
                 </div>
 
-                <div class="col-md-3 border-start">
-                    <select name="tipo" class="form-select border-0 shadow-none bg-transparent">
-                        <option value="">¿Qué tipo?</option>
+                <div class="col-12 col-md-3 dropdown border-start-md">
+                    <button class="btn btn-light w-100 border-0 bg-transparent dropdown-toggle text-start py-2" type="button" id="btnTipo" data-bs-toggle="dropdown">
+                        <span class="text-muted small d-block" style="font-size: 10px;">TIPO</span>
+                        <span id="labelTipo">Propiedad</span>
+                    </button>
+                    <input type="hidden" name="tipo" id="inputTipo" value="{{ request.args.get('tipo', '') }}">
+                    <ul class="dropdown-menu shadow-lg border-0 w-100 mt-2">
+                        <li><a class="dropdown-item py-2" href="#" onclick="seleccionarFiltro('Tipo', '', 'Propiedad')">Todos los tipos</a></li>
                         {% for t in tipos %}
-                        <option value="{{ t.id }}" {% if request.args.get('tipo') == t.id|string %}selected{% endif %}>{{ t.nombre }}</option>
+                        <li><a class="dropdown-item py-2" href="#" onclick="seleccionarFiltro('Tipo', '{{ t.id }}', '{{ t.nombre }}')">{{ t.nombre }}</a></li>
                         {% endfor %}
-                    </select>
+                    </ul>
                 </div>
 
-                <div class="col-md-4 border-start px-3 position-relative">
-                    <input type="text" id="inputUbicacion" name="ubicacion"
-                           class="form-control border-0 shadow-none bg-transparent" 
-                           placeholder="Ciudad o Barrio (Escribí para buscar...)"
-                           value="{{ request.args.get('ubicacion', '') }}">
-                    
-                    <div id="menuSugerencias" class="list-group position-absolute start-0 w-100 mt-2 shadow-lg border-0 rounded-3 overflow-hidden d-none" 
-                         style="z-index: 1000; max-height: 250px; overflow-y: auto;">
-                         </div>
+                <div class="col-12 col-md-4 border-start-md position-relative">
+                    <div class="px-2 py-2">
+                        <span class="text-muted small d-block text-start" style="font-size: 10px; margin-left: 12px;">UBICACIÓN</span>
+                        <input type="text" id="inputUbicacion" name="ubicacion"
+                               class="form-control border-0 shadow-none bg-transparent py-0" 
+                               placeholder="Ciudad o Barrio..."
+                               value="{{ request.args.get('ubicacion', '') }}"
+                               autocomplete="off">
+                    </div>
+                    <div id="menuSugerencias" class="list-group position-absolute start-0 w-100 mt-2 shadow-lg border-0 rounded-3 overflow-hidden d-none" style="z-index: 1000;"></div>
                 </div>
 
-                <div class="col-md-2 p-1">
-                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold">
-                        <i class="bi bi-search"></i>
+                <div class="col-12 col-md-2 p-1">
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-sm">
+                        <i class="bi bi-search"></i> <span class="d-md-none ms-2">BUSCAR</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </section>
+
+<style>
+    /* Estética para que parezca una sola barra en PC */
+    @media (min-width: 768px) {
+        .border-start-md { border-left: 1px solid #eee !important; }
+        .border-end-md { border-right: 1px solid #eee !important; }
+    }
+    .dropdown-toggle::after { color: #0d6efd; margin-left: auto; float: right; margin-top: 10px; }
+    .dropdown-item:hover { background-color: #f0f7ff; color: #0d6efd; }
+    .dropdown-item.active, .dropdown-item:active { background-color: #0d6efd; }
+</style>
