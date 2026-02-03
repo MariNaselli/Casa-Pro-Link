@@ -4,10 +4,103 @@
     .preview-item { width: 90px; position: relative; }
     .preview-item img, .preview-item .icon-box { height: 80px; width: 90px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
     .btn-remove { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; line-height: 1; }
+    
+    /* Estilos para buscadores inteligentes (Barrio y Ciudad) */
+    #sugerenciasBarrio, #sugerenciasLocalidad { 
+        max-height: 200px; 
+        overflow-y: auto; 
+        z-index: 1050; 
+        font-size: 0.9rem;
+    }
+
+    .is-invalid { border-color: #dc3545 !important; }
+    .invalid-feedback-custom { color: #dc3545; font-size: 0.8rem; margin-top: 5px; display: block; }
 </style>
 
 <script>
-    // Borrado AJAX de archivos existentes
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // --- 1. VALIDACIÓN DE TÍTULO DUPLICADO (AJAX) ---
+        const inputTitulo = document.querySelector('input[name="titulo"]');
+        const btnGuardar = document.querySelector('#propiedadForm button[type="submit"]');
+
+        if (inputTitulo) {
+            inputTitulo.addEventListener('blur', function() {
+                const titulo = this.value.trim();
+                if (titulo.length > 3) {
+                    fetch(`/check-slug?titulo=${encodeURIComponent(titulo)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            let errorMsg = document.getElementById('error-titulo');
+                            if (data.exists) {
+                                this.classList.add('is-invalid');
+                                btnGuardar.disabled = true;
+                                if (!errorMsg) {
+                                    errorMsg = document.createElement('span');
+                                    errorMsg.id = 'error-titulo';
+                                    errorMsg.className = 'invalid-feedback-custom';
+                                    errorMsg.innerHTML = '<i class="bi bi-exclamation-circle"></i> Este título ya existe. Elegí uno diferente.';
+                                    this.parentNode.appendChild(errorMsg);
+                                }
+                            } else {
+                                this.classList.remove('is-invalid');
+                                btnGuardar.disabled = false;
+                                if (errorMsg) errorMsg.remove();
+                            }
+                        });
+                }
+            });
+        }
+
+        // --- 2. LÓGICA BUSCADORES INTELIGENTES (BARRIO Y CIUDAD) ---
+        
+        // Función genérica para configurar buscadores
+        function configurarBuscador(inputId, sugerenciasId, listaDatos, icono) {
+            const input = document.getElementById(inputId);
+            const contenedor = document.getElementById(sugerenciasId);
+            
+            if (!input || !contenedor) return;
+
+            input.addEventListener('input', function() {
+                const valor = this.value.toLowerCase().trim();
+                contenedor.innerHTML = ''; 
+
+                if (valor.length > 1) {
+                    const filtrados = listaDatos.filter(item => item.toLowerCase().includes(valor));
+                    if (filtrados.length > 0) {
+                        contenedor.classList.remove('d-none');
+                        filtrados.forEach(texto => {
+                            const item = document.createElement('button');
+                            item.type = 'button';
+                            item.className = 'list-group-item list-group-item-action py-2';
+                            item.innerHTML = `<i class="bi ${icono} me-2 text-muted"></i>${texto}`;
+                            item.onclick = () => { 
+                                input.value = texto; 
+                                contenedor.classList.add('d-none'); 
+                            };
+                            contenedor.appendChild(item);
+                        });
+                    } else { contenedor.classList.add('d-none'); }
+                } else { contenedor.classList.add('d-none'); }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !contenedor.contains(e.target)) {
+                    contenedor.classList.add('d-none');
+                }
+            });
+        }
+
+        // Listas desde Python
+        const barriosExistentes = {{ sugerencias | tojson | safe if sugerencias else '[]' }};
+        const ciudadesExistentes = {{ sugerencias_ciudades | tojson | safe if sugerencias_ciudades else '[]' }};
+
+        // Activamos los dos buscadores
+        configurarBuscador('inputBarrio', 'sugerenciasBarrio', barriosExistentes, 'bi-geo-alt');
+        configurarBuscador('inputLocalidad', 'sugerenciasLocalidad', ciudadesExistentes, 'bi-geo-fill');
+    });
+
+    // --- 3. LÓGICA DE MULTIMEDIA ---
     function borrarArchivoAjax(boton, archivoId) {
         if(!confirm("¿Borrar permanentemente?")) return;
         fetch(`/borrar_archivo/${archivoId}`, { method: "POST" }).then(res => {
@@ -16,6 +109,7 @@
     }
 
     const fileStores = { foto: new DataTransfer(), video: new DataTransfer(), doc: new DataTransfer() };
+    
     function handleFileSelect(input, containerId, type) {
         const store = fileStores[type];
         for (let file of input.files) { store.items.add(file); }
@@ -24,30 +118,22 @@
     }
 
     function renderPreviews(containerId, type, inputId) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = "";
-    Array.from(fileStores[type].files).forEach((file, index) => {
-        const div = document.createElement("div");
-        div.className = "preview-item";
-        
-        // Si es foto, mostramos miniatura. Si es video o doc, mostramos ícono.
-        let content = "";
-        if (type === 'foto') {
-            content = `<img src="${URL.createObjectURL(file)}" style="width: 90px; height: 80px; object-fit: cover; border-radius: 8px;">`;
-        } else {
-            let icon = type === 'video' ? 'bi-play-circle-fill' : 'bi-file-earmark-pdf-fill';
-            let color = type === 'video' ? 'text-primary' : 'text-danger';
-            content = `<div class="icon-box border rounded bg-white d-flex align-items-center justify-content-center" style="height: 80px; width: 90px;">
-                        <i class="bi ${icon} ${color} fs-2"></i>
-                       </div>`;
-        }
-
-        div.innerHTML = `${content}
-            <button type="button" onclick="removeFile('${type}', ${index}, '${containerId}', '${inputId}')" class="btn btn-danger btn-remove shadow-sm">×</button>
-            <div class="small text-truncate text-center mt-1" style="font-size: 10px; width: 90px;">${file.name}</div>`;
-        container.appendChild(div);
-    });
-}
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        Array.from(fileStores[type].files).forEach((file, index) => {
+            const div = document.createElement("div");
+            div.className = "preview-item";
+            let content = type === 'foto' ? 
+                `<img src="${URL.createObjectURL(file)}" style="width: 90px; height: 80px; object-fit: cover; border-radius: 8px;">` :
+                `<div class="icon-box border rounded bg-white d-flex align-items-center justify-content-center" style="height: 80px; width: 90px;">
+                    <i class="bi ${type === 'video' ? 'bi-play-circle-fill' : 'bi-file-earmark-pdf-fill'} ${type === 'video' ? 'text-primary' : 'text-danger'} fs-2"></i>
+                </div>`;
+            div.innerHTML = `${content}
+                <button type="button" onclick="removeFile('${type}', ${index}, '${containerId}', '${inputId}')" class="btn btn-danger btn-remove shadow-sm">×</button>
+                <div class="small text-truncate text-center mt-1" style="font-size: 10px; width: 90px;">${file.name}</div>`;
+            container.appendChild(div);
+        });
+    }
 
     function removeFile(type, index, containerId, inputId) {
         const newStore = new DataTransfer();
@@ -57,12 +143,18 @@
         renderPreviews(containerId, type, inputId);
     }
 
-    // Inicializar Quill
-    var quill = new Quill("#editor-container", { theme: "snow" });
-    document.getElementById("propiedadForm").onsubmit = () => { 
+    // --- 4. QUILL EDITOR ---
+    var quill = new Quill("#editor-container", { 
+        theme: "snow",
+        modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['clean']] }
+    });
+
+    document.getElementById("propiedadForm").onsubmit = function() { 
         document.getElementById("descripcion_input").value = quill.root.innerHTML; 
+        return true; 
     };
 
+    // --- 5. GESTIÓN DE PROPIETARIOS ---
     function agregarPropietario() {
         const div = document.createElement("div");
         div.className = "row mb-3 propietario-fila border-bottom pb-3 mt-2";

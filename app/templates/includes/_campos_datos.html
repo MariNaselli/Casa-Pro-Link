@@ -34,15 +34,30 @@
             <input type="number" name="precio" class="form-control" value="{{ p.precio if p else '' }}" required />
         </div>
     </div>
-    <div class="col-md-3 mb-3">
+
+  <div class="col-md-3 mb-3 position-relative">
+    <label class="form-label fw-bold small text-primary">Ciudad / Localidad</label>
+    <input type="text" 
+           id="inputLocalidad" 
+           name="localidad" 
+           class="form-control border-primary" 
+           placeholder="Escribí ciudad..." 
+           autocomplete="off" 
+           required 
+           value="{{ p.localidad if p else '' }}">
+    <div id="sugerenciasLocalidad" class="list-group shadow-lg position-absolute w-100 d-none" style="z-index: 1000; top: 100%;"></div>
+</div>
+
+    <div class="col-md-3 mb-3 position-relative">
         <label class="form-label fw-bold small text-primary">Barrio</label>
-        <select name="barrio_id" class="form-select border-primary" required>
-            <option value="">Seleccionar barrio...</option>
-            {% for b in barrios %}
-            <option value="{{ b.id }}" {% if p and p.barrio_id == b.id %}selected{% endif %}>{{ b.nombre }}</option>
-            {% endfor %}
-        </select>
+        <input type="text" id="inputBarrio" name="barrio_nombre" class="form-control border-primary" 
+               placeholder="Escribí para buscar..." autocomplete="off" required 
+               value="{{ p.barrio_rel.nombre if p else '' }}">
+        <div id="sugerenciasBarrio" class="list-group shadow-lg position-absolute w-100 d-none" style="z-index: 1000; top: 100%;"></div>
     </div>
+</div>
+
+<div class="row">
     <div class="col-md-4 mb-3">
         <label class="form-label fw-bold small">Calle</label>
         <input type="text" name="calle" class="form-control" value="{{ p.calle if p else '' }}" />
@@ -91,4 +106,13 @@
         {{ p.descripcion|safe if p else '' }}
     </div>
     <input type="hidden" name="descripcion" id="descripcion_input" />
+</div>
+
+<div class="p-3 border rounded bg-warning bg-opacity-10 mb-4">
+    <div class="form-check form-switch">
+        <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="switchDestacada" name="destacada" {% if p and p.destacada %}checked{% endif %}>
+        <label class="form-check-label fw-bold text-dark" for="switchDestacada">
+            <i class="bi bi-star-fill text-warning"></i> DESTACAR EN INICIO (Visible al público)
+        </label>
+    </div>
 </div>

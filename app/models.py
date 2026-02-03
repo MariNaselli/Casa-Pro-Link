@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
-# --- TABLAS MAESTRAS (Autoadministrables) ---
+# --- TABLAS MAESTRAS (Para llenar los selectores de filtros) ---
 
 class TipoPropiedad(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -21,40 +21,44 @@ class Barrio(db.Model):
     nombre = db.Column(db.String(100), unique=True, nullable=False)
     propiedades = db.relationship('Propiedad', backref='barrio_rel', lazy=True)
 
-# --- CLASE PRINCIPAL REFORMADA ---
+# --- CLASE PRINCIPAL ---
 
 class Propiedad(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.Text)
-    slug = db.Column(db.String(255), unique=True, nullable=True)
+    slug = db.Column(db.String(255), unique=True, nullable=True) # Para URLs amigables
     
-    # Reemplazamos los Strings por ForeignKeys (IDs)
+    # RELACIONES (Clave para los filtros)
     tipo_id = db.Column(db.Integer, db.ForeignKey('tipo_propiedad.id'))
     operacion_id = db.Column(db.Integer, db.ForeignKey('tipo_operacion.id'))
     barrio_id = db.Column(db.Integer, db.ForeignKey('barrio.id'))
     
+    # Ubicación física
     localidad = db.Column(db.String(100), default='Córdoba')
     calle = db.Column(db.String(200))
     altura = db.Column(db.String(50))
     
+    # Precios
     precio = db.Column(db.Integer)
-    moneda = db.Column(db.String(10), default='ARS')
+    moneda = db.Column(db.String(10), default='ARS') # USD o ARS
     expensas = db.Column(db.Integer)
     
-    # Datos técnicos
+    # Datos técnicos (Filtros numéricos)
     m2_totales = db.Column(db.Integer)
     m2_cubiertos = db.Column(db.Integer)
     dormitorios = db.Column(db.Integer, default=0)
     banios = db.Column(db.Integer, default=0)
     
-    # Estados y Trazabilidad (Lo que hablamos para ser Pro)
+    # Estados y Control
     estado = db.Column(db.String(20), default='Disponible') # Disponible, Reservado, Vendido
-    destacada = db.Column(db.Boolean, default=False)
-    activo = db.Column(db.Boolean, default=True)
-    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+    destacada = db.Column(db.Boolean, default=False) # <--- ESTO ES LO QUE PIDIÓ TU HERMANO
+    activo = db.Column(db.Boolean, default=True)     # "Borrado lógico" (papelera)
     
-    # Comodidades e Internos
+    # CAMBIO IMPORTANTE: Unificamos nombre a 'fecha_carga' para coincidir con routes.py
+    fecha_carga = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Comodidades (Checkboxes)
     notas_internas = db.Column(db.Text)
     mostrar_inmo = db.Column(db.Boolean, default=False)
     cochera = db.Column(db.Boolean, default=False)
@@ -62,11 +66,11 @@ class Propiedad(db.Model):
     quincho = db.Column(db.Boolean, default=False)
     patio = db.Column(db.Boolean, default=False)
     
-    # RELACIONES
+    # RELACIONES CON HIJOS
     archivos = db.relationship('Multimedia', backref='propiedad', lazy=True, cascade="all, delete-orphan")
     propietarios = db.relationship('Propietario', backref='propiedad', lazy=True)
 
-# --- LAS DEMÁS CLASES SE MANTIENEN SIMILARES PERO CON AJUSTES ---
+# --- TABLAS SECUNDARIAS ---
 
 class Propietario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
