@@ -8,25 +8,38 @@
 {% endif %}
 
 {% if current_user.is_authenticated %}
-<div class="bg-light border-bottom py-4 mb-4" style="margin-top: -24px;">
+<div class="bg-light border-bottom py-4 mb-4 shadow-sm">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-4">
-                <h4 class="fw-bold mb-0">Gestión de Propiedades</h4>
-                <p class="text-muted small mb-0">Bienvenido al panel de control</p>
+        <div class="row g-3 align-items-center">
+            
+            <div class="col-12 col-md-4 text-center text-md-start">
+                <h4 class="fw-bold mb-0 text-dark">Panel de Gestión</h4>
+                <p class="text-muted small mb-0">Administración de catálogo</p>
             </div>
-            <div class="col-md-5">
-                <form action="/" method="GET" class="input-group">
-                    <input type="text" name="q" class="form-control" placeholder="Buscar título, calle o barrio..." value="{{ busqueda or '' }}">
-                    <button class="btn btn-dark" type="submit"><i class="bi bi-search"></i></button>
-                    {% if busqueda %}<a href="/" class="btn btn-outline-secondary">Limpiar</a>{% endif %}
+
+            <div class="col-12 col-md-5">
+                <form action="/" method="GET" class="input-group shadow-sm rounded-pill overflow-hidden border bg-white">
+                    <input type="text" name="q" class="form-control border-0 ps-4 py-2" 
+                           placeholder="Buscar por título, calle o barrio..." 
+                           value="{{ busqueda or '' }}" 
+                           style="box-shadow: none;"> <button class="btn btn-white bg-white border-0 text-secondary pe-3" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    
+                    {% if busqueda %}
+                    <a href="/" class="btn btn-white bg-white border-0 text-danger pe-3 d-flex align-items-center">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </a>
+                    {% endif %}
                 </form>
             </div>
-            <div class="col-md-3 text-end">
-                <a href="{{ url_for('cargar') }}" class="btn btn-primary rounded-pill px-4 fw-bold">
-                    <i class="bi bi-plus-circle"></i> Nueva Propiedad
+
+            <div class="col-12 col-md-3 text-center text-md-end">
+                <a href="{{ url_for('cargar') }}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm w-100 w-md-auto">
+                    <i class="bi bi-plus-lg me-1"></i> Nueva Propiedad
                 </a>
             </div>
+
         </div>
     </div>
 </div>
@@ -34,33 +47,44 @@
 
 <div class="container mt-4">
   {% if current_user.is_authenticated %}
-    <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
-        <span class="text-muted small">{{ propiedades|length }} propiedades encontradas</span>
-    </div>
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+        <span class="text-muted small fw-bold">
+            <i class="bi bi-list-check me-1"></i> {{ propiedades|length }} propiedades activas
+        </span>
+        </div>
   {% endif %}
 
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 pb-5">
     {% for p in propiedades %}
     <div class="col">
-      <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden position-relative">
+      <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden position-relative hover-card">
         
         {% set img = p.archivos | selectattr('tipo', 'equalto', 'imagen') | first %}
         <div class="position-relative">
             <img src="{{ url_for('static', filename='uploads/' + img.archivo_nombre) if img else url_for('static', filename='img/no-photo.jpg') }}" 
-                 class="card-img-top" style="height: 180px; object-fit: cover">
-            <span class="badge position-absolute top-0 end-0 m-2 {{ 'bg-success' if p.operacion_rel.nombre == 'Venta' else 'bg-warning text-dark' }} rounded-pill px-3">
+                 class="card-img-top" style="height: 200px; object-fit: cover">
+            
+            <span class="badge position-absolute top-0 end-0 m-3 {{ 'bg-success' if p.operacion_rel.nombre == 'Venta' else 'bg-warning text-dark' }} rounded-pill px-3 shadow-sm">
                 {{ p.operacion_rel.nombre }}
+            </span>
+
+            <span class="badge position-absolute bottom-0 start-0 m-3 bg-dark bg-opacity-75 rounded-pill px-2 small">
+                {{ p.tipo.nombre }}
             </span>
         </div>
 
-        <div class="card-body p-3">
-          <h6 class="fw-bold mb-1 text-truncate">{{ p.titulo }}</h6>
-          <p class="text-muted small mb-2"><i class="bi bi-geo-alt text-danger"></i> {{ p.barrio_rel.nombre }}</p>
-          <h6 class="text-primary fw-bold mb-0 fs-5">
-            {{ p.moneda }} {{ "{:,.0f}".format(p.precio).replace(',', '.') if p.precio else 'Consultar' }}
-          </h6>
+        <div class="card-body p-3 d-flex flex-column">
+          <div class="mb-auto">
+              <h6 class="fw-bold mb-1 text-truncate" title="{{ p.titulo }}">{{ p.titulo }}</h6>
+              <p class="text-muted small mb-2 text-truncate">
+                <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ p.barrio_rel.nombre }}
+              </p>
+              <h5 class="text-primary fw-bold mb-0">
+                {{ p.moneda }} {{ "{:,.0f}".format(p.precio).replace(',', '.') if p.precio else 'Consultar' }}
+              </h5>
+          </div>
           
-          <div class="mt-3 pt-3 border-top d-flex justify-content-between">
+          <div class="mt-3 pt-3 border-top w-100">
              {% include 'includes/_acciones.html' %}
           </div>
         </div>
@@ -69,15 +93,26 @@
     </div>
     {% else %}
     <div class="col-12 text-center py-5">
-        <i class="bi bi-house-door fs-1 text-muted opacity-25"></i>
-        <h5 class="mt-3 text-muted">No se encontraron propiedades</h5>
-        <a href="/" class="btn btn-link">Ver todas las propiedades</a>
+        <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+            <i class="bi bi-search fs-1 text-muted opacity-50"></i>
+        </div>
+        <h5 class="text-muted">No encontramos propiedades</h5>
+        <p class="text-muted small">Intenta con otra búsqueda o ubicación.</p>
+        <a href="/" class="btn btn-outline-primary rounded-pill px-4">Ver todo el catálogo</a>
     </div>
     {% endfor %}
   </div>
 </div>
 
 {% include 'includes/_modal_eliminar.html' %}
+
+<style>
+    .hover-card { transition: transform 0.2s ease-in-out; }
+    .hover-card:hover { transform: translateY(-5px); }
+    /* Ajuste para que el botón 'Nueva Propiedad' no ocupe todo el ancho en PC */
+    @media (min-width: 768px) { .w-md-auto { width: auto !important; } }
+</style>
+
 {% endblock %}
 
 {% block scripts %}
@@ -88,57 +123,41 @@
         const input = document.getElementById('inputUbicacion');
         const menu = document.getElementById('menuSugerencias');
         
-        // Si no estamos en la home pública (Admin), estos elementos no existen, así que salimos.
+        // Si no estamos en la home pública, salimos
         if (!input || !menu) return;
 
-        // Recibimos la lista limpia desde Python (si no llega nada, usa lista vacía)
         const todasLasOpciones = {{ sugerencias | default([]) | tojson }};
 
-        // Escuchamos lo que escribe el usuario
         input.addEventListener('input', function() {
             const valor = this.value.toLowerCase().trim();
-            
-            // Limpiamos el menú
             menu.innerHTML = '';
             
-            // Si hay menos de 2 letras, ocultamos el menú y no hacemos nada
             if (valor.length < 2) {
                 menu.classList.add('d-none');
                 return;
             }
 
-            // Filtramos las coincidencias
             const coincidencias = todasLasOpciones.filter(op => op.toLowerCase().includes(valor));
 
-            // Si no hay coincidencias, ocultamos
             if (coincidencias.length === 0) {
                 menu.classList.add('d-none');
                 return;
             }
 
-            // Creamos los botones lindos dentro del menú
             coincidencias.forEach(op => {
                 const item = document.createElement('button');
                 item.className = "list-group-item list-group-item-action text-start border-0 px-3 py-2";
                 item.innerHTML = `<i class="bi bi-geo-alt-fill text-danger me-2"></i> ${op}`;
-                
-                // Al hacer clic, rellenamos el input y ocultamos el menú
                 item.onclick = function(e) {
                     e.preventDefault(); 
                     input.value = op;
                     menu.classList.add('d-none');
-                    // Opcional: Podés hacer que se envíe el formulario automáticamente al elegir
-                    // input.form.submit(); 
                 };
-                
                 menu.appendChild(item);
             });
-
-            // Mostramos el menú
             menu.classList.remove('d-none');
         });
 
-        // Cerrar el menú si clickea afuera
         document.addEventListener('click', function(e) {
             if (!input.contains(e.target) && !menu.contains(e.target)) {
                 menu.classList.add('d-none');

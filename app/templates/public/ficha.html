@@ -7,10 +7,33 @@
   <div class="row mb-4 align-items-center">
     <div class="col-6">
         <a href="/" class="text-decoration-none text-muted fw-medium border px-3 py-2 rounded-pill bg-white shadow-sm small text-nowrap">
-            <i class="bi bi-arrow-left me-1"></i> Volver a Propiedades
+            <i class="bi bi-arrow-left me-1"></i> Volver
         </a>
     </div>
-    <div class="col-6 text-end"></div>
+    
+    <div class="col-6 text-end">
+        {% if current_user.is_authenticated %}
+            <div class="d-inline-flex align-items-center bg-white px-3 py-2 rounded-pill shadow-sm border">
+                <a href="{{ url_for('editar', id=p.id) }}" class="text-primary d-flex align-items-center" title="Editar Propiedad">
+                    <i class="bi bi-pencil-square fs-5"></i>
+                </a>
+                
+                <div class="vr mx-3 text-muted opacity-25"></div>
+                
+                <a href="{{ url_for('ver_legajo', id=p.id) }}" class="text-dark d-flex align-items-center" title="Ver Legajo Privado">
+                    <i class="bi bi-folder-fill fs-5"></i>
+                </a>
+
+                <div class="vr mx-3 text-muted opacity-25"></div>
+
+                <a href="#" class="text-danger d-flex align-items-center" title="Eliminar Propiedad"
+                   data-bs-toggle="modal" data-bs-target="#modalEliminar" 
+                   onclick="prepararEliminar('{{ url_for('eliminar', id=p.id) }}')">
+                    <i class="bi bi-trash fs-5"></i>
+                </a>
+            </div>
+        {% endif %}
+    </div>
   </div>
 
   <div class="row mb-4">
@@ -27,22 +50,6 @@
     <div class="col-lg-4 order-1 order-lg-2">
       <div class="sticky-top" style="top: 2rem; z-index: 1;">
           
-          {% if current_user.is_authenticated %}
-          <div class="mb-4">
-              <div class="d-flex gap-2">
-                  <a href="{{ url_for('editar', id=p.id) }}" class="btn btn-primary flex-fill fw-bold shadow-sm">
-                      <i class="bi bi-pencil-square"></i> Editar
-                  </a>
-                  <a href="{{ url_for('ver_legajo', id=p.id) }}" class="btn btn-dark flex-fill fw-bold shadow-sm">
-                      <i class="bi bi-folder-fill"></i> Legajo
-                  </a>
-                  <button type="button" class="btn btn-danger shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEliminar" onclick="prepararEliminar('{{ url_for('eliminar', id=p.id) }}')">
-                      <i class="bi bi-trash"></i>
-                  </button>
-              </div>
-          </div>
-          {% endif %}
-
           <div class="mb-3">
               <span class="badge {{ 'bg-success' if p.operacion_rel.nombre == 'Venta' else 'bg-warning text-dark' }} rounded-pill px-3 shadow-sm">
                 {{ p.operacion_rel.nombre|upper }}
@@ -190,13 +197,11 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/propiedades.js') }}"></script>
 <script>
-    // FUNCIÓN CORREGIDA: Recibe 'elemento' para saber cuál se tocó
     function actualizarVisualizacionInmo(id, elemento) {
         const estado = elemento.checked;
         const idMob = 'checkInmoMobile';
         const idPC = 'checkInmoDesktop';
         
-        // 1. Sincronizar el otro switch (si existe en pantalla)
         if (elemento.id === idMob) {
             const otro = document.getElementById(idPC);
             if(otro) otro.checked = estado;
@@ -205,25 +210,17 @@
             if(otro) otro.checked = estado;
         }
 
-        // 2. Controlar visibilidad de las secciones
         const sectionMob = document.getElementById('seccionInmoMobile');
         const sectionPC = document.getElementById('seccionInmoDesktop');
         
         if (estado) {
-            // MOSTRAR:
-            // Móvil: Quitamos d-none (queda d-block por defecto)
             if(sectionMob) sectionMob.classList.remove('d-none');
-            // PC: Agregamos d-lg-block para que se vea en desktop
             if(sectionPC) sectionPC.classList.add('d-lg-block');
         } else {
-            // OCULTAR:
-            // Móvil: Ponemos d-none
             if(sectionMob) sectionMob.classList.add('d-none');
-            // PC: Quitamos d-lg-block (al tener d-none base, se oculta)
             if(sectionPC) sectionPC.classList.remove('d-lg-block');
         }
 
-        // 3. Guardar en Base de Datos
         fetch(`/toggle_inmo/${id}`, { method: 'POST' });
     }
 </script>
