@@ -6,7 +6,7 @@
 
 <div class="container mt-4 mb-5 pb-5">
     <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-arrow-left fs-4 me-3" style="cursor: pointer" onclick="window.history.back()"></i>
+        <a href="{{ url_for('home') }}" class="text-dark"><i class="bi bi-arrow-left fs-4 me-3"></i></a>
         <h2 class="mb-0 fw-bold">
             {% if p %} Editar Propiedad: {{ p.titulo }} {% else %} Cargar Nueva Propiedad {% endif %}
         </h2>
@@ -16,18 +16,17 @@
           action="{{ url_for('editar', id=p.id) if p else url_for('cargar') }}" 
           method="POST" 
           enctype="multipart/form-data" 
-          class="card p-4 shadow-sm border-0">
+          class="card p-4 shadow-sm border-0 bg-white">
         
         {% include 'includes/_campos_datos.html' %}
-
+        <hr class="my-4">
         {% include 'includes/_multimedia.html' %}
+       
 
-        {% include 'includes/_propietarios.html' %}
-
-        <div class="d-flex justify-content-between mt-4 border-top pt-4">
-            <a href="{{ url_for('home') }}" class="btn btn-outline-secondary px-4 rounded-pill">Cancelar</a>
-            <button type="submit" class="btn btn-success px-5 fw-bold rounded-pill shadow-sm">
-                {% if p %} Guardar Cambios {% else %} Guardar Propiedad {% endif %}
+        <div class="d-flex justify-content-between mt-5 border-top pt-4">
+            <a href="{{ url_for('home') }}" class="btn btn-light px-4">Cancelar</a>
+            <button type="submit" class="btn btn-success px-5 fw-bold shadow-sm rounded-pill">
+                {% if p %} Actualizar Todo {% else %} Publicar Propiedad {% endif %}
             </button>
         </div>
     </form>
@@ -35,7 +34,5 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/propiedades.js') }}"></script>
-    
     {% include 'includes/_scripts_js.html' %}
 {% endblock %}

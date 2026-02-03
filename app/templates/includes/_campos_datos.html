@@ -4,8 +4,8 @@
         <input type="text" name="titulo" class="form-control" value="{{ p.titulo if p else '' }}" placeholder="Ej: Departamento 1 dorm." required />
     </div>
     <div class="col-md-3 mb-3">
-        <label class="form-label fw-bold small text-primary">Tipo de Propiedad</label>
-        <select name="tipo_id" class="form-select border-primary shadow-sm" required>
+        <label class="form-label fw-bold small text-primary">Tipo</label>
+        <select name="tipo_id" class="form-select border-primary" required>
             <option value="">Seleccionar...</option>
             {% for t in tipos %}
             <option value="{{ t.id }}" {% if p and p.tipo_id == t.id %}selected{% endif %}>{{ t.nombre }}</option>
@@ -23,6 +23,50 @@
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-md-12 mb-3">
+        <label class="form-label fw-bold text-primary"><i class="bi bi-search"></i> Buscador de Dirección Exacta</label>
+        <div class="input-group shadow-sm">
+            <input type="text" id="address-search" class="form-control border-primary" placeholder="Escribí calle y altura (ej: San Martin 500, Cordoba)...">
+            <button class="btn btn-primary" type="button" id="btn-search-map">Buscar</button>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div id="map-editor" style="height: 400px; border-radius: 12px;" class="border shadow-sm"></div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="bg-light p-3 rounded border h-100">
+            <label class="small fw-bold mb-2 d-block">Datos de Ubicación:</label>
+            <div class="mb-2">
+                <label class="x-small text-muted">Ciudad / Localidad</label>
+                <input type="text" name="localidad" id="res-localidad" class="form-control form-control-sm" value="{{ p.localidad if p else '' }}" required>
+            </div>
+            <div class="mb-2">
+                <label class="x-small text-muted">Barrio</label>
+                <input type="text" name="barrio_nombre" id="res-barrio" class="form-control form-control-sm" value="{{ p.barrio_rel.nombre if p else '' }}" required>
+            </div>
+            <div class="mb-2">
+                <label class="x-small text-muted">Calle</label>
+                <input type="text" name="calle" id="res-calle" class="form-control form-control-sm" value="{{ p.calle if p else '' }}">
+            </div>
+            <div class="row">
+                <div class="col-6 mb-2">
+                    <label class="x-small text-muted">Altura</label>
+                    <input type="text" name="altura" id="res-altura" class="form-control form-control-sm" value="{{ p.altura if p else '' }}">
+                </div>
+                <div class="col-6 mb-2">
+                    <label class="x-small text-muted">Cód. Postal</label>
+                    <input type="text" name="codigo_postal" id="res-cp" class="form-control form-control-sm" value="{{ p.codigo_postal if p else '' }}">
+                </div>
+            </div>
+            <input type="hidden" name="latitud" id="res-lat" value="{{ p.latitud if p else '' }}">
+            <input type="hidden" name="longitud" id="res-lng" value="{{ p.longitud if p else '' }}">
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-3 mb-3">
         <label class="form-label fw-bold small">Precio</label>
@@ -34,41 +78,6 @@
             <input type="number" name="precio" class="form-control" value="{{ p.precio if p else '' }}" required />
         </div>
     </div>
-
-  <div class="col-md-3 mb-3 position-relative">
-    <label class="form-label fw-bold small text-primary">Ciudad / Localidad</label>
-    <input type="text" 
-           id="inputLocalidad" 
-           name="localidad" 
-           class="form-control border-primary" 
-           placeholder="Escribí ciudad..." 
-           autocomplete="off" 
-           required 
-           value="{{ p.localidad if p else '' }}">
-    <div id="sugerenciasLocalidad" class="list-group shadow-lg position-absolute w-100 d-none" style="z-index: 1000; top: 100%;"></div>
-</div>
-
-    <div class="col-md-3 mb-3 position-relative">
-        <label class="form-label fw-bold small text-primary">Barrio</label>
-        <input type="text" id="inputBarrio" name="barrio_nombre" class="form-control border-primary" 
-               placeholder="Escribí para buscar..." autocomplete="off" required 
-               value="{{ p.barrio_rel.nombre if p else '' }}">
-        <div id="sugerenciasBarrio" class="list-group shadow-lg position-absolute w-100 d-none" style="z-index: 1000; top: 100%;"></div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-4 mb-3">
-        <label class="form-label fw-bold small">Calle</label>
-        <input type="text" name="calle" class="form-control" value="{{ p.calle if p else '' }}" />
-    </div>
-    <div class="col-md-2 mb-3">
-        <label class="form-label fw-bold small">Altura</label>
-        <input type="text" name="altura" class="form-control" value="{{ p.altura if p else '' }}" />
-    </div>
-</div>
-
-<div class="row">
     <div class="col-md-2 mb-3">
         <label class="form-label fw-bold small">Dormitorios</label>
         <input type="number" name="dormitorios" class="form-control" value="{{ p.dormitorios if p else 0 }}" />
@@ -77,20 +86,22 @@
         <label class="form-label fw-bold small">Baños</label>
         <input type="number" name="banios" class="form-control" value="{{ p.banios if p else 0 }}" />
     </div>
-    <div class="col-md-4 mb-3">
-        <label class="form-label fw-bold small">M2 Totales</label>
-        <input type="number" name="m2_totales" class="form-control" value="{{ p.m2_totales if p else '' }}" />
-    </div>
-    <div class="col-md-4 mb-3">
-        <label class="form-label fw-bold small text-primary">M2 Cubiertos</label>
-        <input type="number" name="m2_cubiertos" class="form-control" value="{{ p.m2_cubiertos if p else '' }}" />
+    <div class="col-md-5 mb-3 d-flex gap-2">
+        <div class="w-50">
+            <label class="form-label fw-bold small">M2 Totales</label>
+            <input type="number" name="m2_totales" class="form-control" value="{{ p.m2_totales if p else '' }}" />
+        </div>
+        <div class="w-50">
+            <label class="form-label fw-bold small">M2 Cubiertos</label>
+            <input type="number" name="m2_cubiertos" class="form-control" value="{{ p.m2_cubiertos if p else '' }}" />
+        </div>
     </div>
 </div>
 
 <div class="mb-4">
     <label class="form-label fw-bold text-secondary small">Comodidades</label>
     <div class="d-flex flex-wrap gap-3 p-3 border rounded bg-light">
-        {% for item_id, icono in [('cochera','car-front'), ('pileta','water'), ('quincho','fire'), ('patio','tree')] %}
+        {% for item_id, icono in [('cochera','car-front'), ('pileta','water'), ('quincho','fire'), ('patio','tree'), ('terraza','border-outer'), ('balcon','view-stacked')] %}
         <div class="form-check">
             <input class="form-check-input" type="checkbox" name="{{ item_id }}" id="{{ item_id }}" 
             {% if p and p[item_id] %}checked{% endif %} />
@@ -108,11 +119,45 @@
     <input type="hidden" name="descripcion" id="descripcion_input" />
 </div>
 
-<div class="p-3 border rounded bg-warning bg-opacity-10 mb-4">
-    <div class="form-check form-switch">
+<div class="p-3 border rounded bg-warning bg-opacity-10 mb-4 text-center">
+    <div class="form-check form-switch d-inline-block">
         <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="switchDestacada" name="destacada" {% if p and p.destacada %}checked{% endif %}>
         <label class="form-check-label fw-bold text-dark" for="switchDestacada">
             <i class="bi bi-star-fill text-warning"></i> DESTACAR EN INICIO (Visible al público)
         </label>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 small fw-bold"><i class="bi bi-person-badge me-2"></i> Datos del Propietario (Privado)</h5>
+        <button type="button" class="btn btn-sm btn-outline-light" onclick="agregarPropietario()">+ Agregar</button>
+    </div>
+    <div class="card-body bg-light" id="contenedor-propietarios">
+        {% if p and p.propietarios %}
+            {% for prop in p.propietarios %}
+            <div class="row mb-3 propietario-fila border-bottom pb-3 mt-2">
+                <div class="col-md-3">
+                    <label class="small fw-bold">Nombre</label>
+                    <input type="text" name="propietario_nombre[]" class="form-control form-control-sm" value="{{ prop.nombre }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="small fw-bold">Teléfono</label>
+                    <input type="text" name="propietario_tel[]" class="form-control form-control-sm" value="{{ prop.telefono }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="small fw-bold">Email</label>
+                    <input type="email" name="propietario_email[]" class="form-control form-control-sm" value="{{ prop.email }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="small fw-bold">Notas</label>
+                    <input type="text" name="notas_legajo[]" class="form-control form-control-sm" value="{{ prop.notas_legajo }}">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.row').remove()">×</button>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
     </div>
 </div>

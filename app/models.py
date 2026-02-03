@@ -3,17 +3,14 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
-# --- TABLAS MAESTRAS (Para llenar los selectores de filtros) ---
-
 class TipoPropiedad(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(50), unique=True, nullable=False) # Ej: Casa, Dpto, Licitación
-    # Relación para saber cuántas propiedades hay de este tipo
+    nombre = db.Column(db.String(50), unique=True, nullable=False)
     propiedades = db.relationship('Propiedad', backref='tipo', lazy=True)
 
 class TipoOperacion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(50), unique=True, nullable=False) # Ej: Venta, Alquiler
+    nombre = db.Column(db.String(50), unique=True, nullable=False)
     propiedades = db.relationship('Propiedad', backref='operacion_rel', lazy=True)
 
 class Barrio(db.Model):
@@ -21,56 +18,50 @@ class Barrio(db.Model):
     nombre = db.Column(db.String(100), unique=True, nullable=False)
     propiedades = db.relationship('Propiedad', backref='barrio_rel', lazy=True)
 
-# --- CLASE PRINCIPAL ---
-
 class Propiedad(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.Text)
-    slug = db.Column(db.String(255), unique=True, nullable=True) # Para URLs amigables
+    slug = db.Column(db.String(255), unique=True, nullable=True)
     
-    # RELACIONES (Clave para los filtros)
     tipo_id = db.Column(db.Integer, db.ForeignKey('tipo_propiedad.id'))
     operacion_id = db.Column(db.Integer, db.ForeignKey('tipo_operacion.id'))
     barrio_id = db.Column(db.Integer, db.ForeignKey('barrio.id'))
     
-    # Ubicación física
     localidad = db.Column(db.String(100), default='Córdoba')
     calle = db.Column(db.String(200))
     altura = db.Column(db.String(50))
+    codigo_postal = db.Column(db.String(20))
+
+    # --- NUEVOS CAMPOS PARA EL MAPA ---
+    latitud = db.Column(db.Float)
+    longitud = db.Column(db.Float)
+    # ----------------------------------
     
-    # Precios
     precio = db.Column(db.Integer)
-    moneda = db.Column(db.String(10), default='ARS') # USD o ARS
+    moneda = db.Column(db.String(10), default='ARS')
     expensas = db.Column(db.Integer)
-    
-    # Datos técnicos (Filtros numéricos)
     m2_totales = db.Column(db.Integer)
     m2_cubiertos = db.Column(db.Integer)
     dormitorios = db.Column(db.Integer, default=0)
     banios = db.Column(db.Integer, default=0)
     
-    # Estados y Control
-    estado = db.Column(db.String(20), default='Disponible') # Disponible, Reservado, Vendido
-    destacada = db.Column(db.Boolean, default=False) # <--- ESTO ES LO QUE PIDIÓ TU HERMANO
-    activo = db.Column(db.Boolean, default=True)     # "Borrado lógico" (papelera)
-    
-    # CAMBIO IMPORTANTE: Unificamos nombre a 'fecha_carga' para coincidir con routes.py
+    estado = db.Column(db.String(20), default='Disponible')
+    destacada = db.Column(db.Boolean, default=False)
+    activo = db.Column(db.Boolean, default=True)
     fecha_carga = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Comodidades (Checkboxes)
     notas_internas = db.Column(db.Text)
     mostrar_inmo = db.Column(db.Boolean, default=False)
     cochera = db.Column(db.Boolean, default=False)
     pileta = db.Column(db.Boolean, default=False)
     quincho = db.Column(db.Boolean, default=False)
     patio = db.Column(db.Boolean, default=False)
+    terraza = db.Column(db.Boolean, default=False)
+    balcon = db.Column(db.Boolean, default=False)
     
-    # RELACIONES CON HIJOS
     archivos = db.relationship('Multimedia', backref='propiedad', lazy=True, cascade="all, delete-orphan")
     propietarios = db.relationship('Propietario', backref='propiedad', lazy=True)
-
-# --- TABLAS SECUNDARIAS ---
 
 class Propietario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -84,7 +75,7 @@ class Propietario(db.Model):
 class Multimedia(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     archivo_nombre = db.Column(db.String(255), nullable=False)
-    tipo = db.Column(db.String(20), nullable=False) # imagen, video, documento
+    tipo = db.Column(db.String(20), nullable=False)
     propiedad_id = db.Column(db.Integer, db.ForeignKey('propiedad.id'), nullable=False)
 
 class Usuario(db.Model, UserMixin):
