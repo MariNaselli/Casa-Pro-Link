@@ -96,8 +96,10 @@ def cargar():
                 m2_totales=int(request.form.get('m2_totales') or 0), m2_cubiertos=int(request.form.get('m2_cubiertos') or 0),
                 dormitorios=int(request.form.get('dormitorios') or 0), banios=int(request.form.get('banios') or 0),
                 destacada=request.form.get('destacada') == 'on', cochera=request.form.get('cochera') == 'on',
-                pileta=request.form.get('pileta') == 'on', quincho=request.form.get('quincho') == 'on',
+                quincho=request.form.get('quincho') == 'on',
                 patio=request.form.get('patio') == 'on', terraza=request.form.get('terraza') == 'on', balcon=request.form.get('balcon') == 'on',
+                sum=request.form.get('sum') == 'on', gimnasio=request.form.get('gimnasio') == 'on', piscina=request.form.get('piscina') == 'on',
+                
                 activo=True, estado='Disponible'
             )
             db.session.add(nueva_p)
@@ -127,8 +129,8 @@ def editar(id):
         p.precio, p.moneda = int(request.form.get('precio') or 0), request.form.get('moneda')
         p.dormitorios, p.banios = int(request.form.get('dormitorios') or 0), int(request.form.get('banios') or 0)
         p.m2_totales, p.m2_cubiertos = int(request.form.get('m2_totales') or 0), int(request.form.get('m2_cubiertos') or 0)
-        p.destacada, p.cochera, p.pileta = request.form.get('destacada')=='on', request.form.get('cochera')=='on', request.form.get('pileta')=='on'
-        p.quincho, p.patio, p.terraza, p.balcon = request.form.get('quincho')=='on', request.form.get('patio')=='on', request.form.get('terraza')=='on', request.form.get('balcon')=='on'
+        p.destacada, p.cochera, = request.form.get('destacada')=='on', request.form.get('cochera')=='on', request.form.get('pileta')=='on'
+        p.quincho, p.patio, p.terraza, p.balcon, p.sum, p.gimnasio, p.piscina= request.form.get('quincho')=='on', request.form.get('patio')=='on', request.form.get('terraza')=='on', request.form.get('balcon')=='on'
         
         Propietario.query.filter_by(propiedad_id=p.id).delete()
         _procesar_datos_adicionales(request, p.id)

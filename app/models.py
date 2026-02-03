@@ -54,11 +54,14 @@ class Propiedad(db.Model):
     notas_internas = db.Column(db.Text)
     mostrar_inmo = db.Column(db.Boolean, default=False)
     cochera = db.Column(db.Boolean, default=False)
-    pileta = db.Column(db.Boolean, default=False)
     quincho = db.Column(db.Boolean, default=False)
     patio = db.Column(db.Boolean, default=False)
     terraza = db.Column(db.Boolean, default=False)
     balcon = db.Column(db.Boolean, default=False)
+    sum = db.Column(db.Boolean, default=False)
+    gimnasio = db.Column(db.Boolean, default=False)
+    piscina = db.Column(db.Boolean, default=False)
+ 
     
     archivos = db.relationship('Multimedia', backref='propiedad', lazy=True, cascade="all, delete-orphan")
     propietarios = db.relationship('Propietario', backref='propiedad', lazy=True)

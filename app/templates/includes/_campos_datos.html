@@ -101,7 +101,7 @@
 <div class="mb-4">
     <label class="form-label fw-bold text-secondary small">Comodidades</label>
     <div class="d-flex flex-wrap gap-3 p-3 border rounded bg-light">
-        {% for item_id, icono in [('cochera','car-front'), ('pileta','water'), ('quincho','fire'), ('patio','tree'), ('terraza','border-outer'), ('balcon','view-stacked')] %}
+        {% for item_id, icono in [('cochera','car-front'), ('piscina','water'), ('quincho','fire'), ('patio','tree'), ('terraza','border-outer'), ('balcon','view-stacked'), ('sum','house-heart'), ('gimnasio','bicycle')] %}
         <div class="form-check">
             <input class="form-check-input" type="checkbox" name="{{ item_id }}" id="{{ item_id }}" 
             {% if p and p[item_id] %}checked{% endif %} />
