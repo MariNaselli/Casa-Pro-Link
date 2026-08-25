@@ -129,8 +129,16 @@ def editar(id):
         p.precio, p.moneda = int(request.form.get('precio') or 0), request.form.get('moneda')
         p.dormitorios, p.banios = int(request.form.get('dormitorios') or 0), int(request.form.get('banios') or 0)
         p.m2_totales, p.m2_cubiertos = int(request.form.get('m2_totales') or 0), int(request.form.get('m2_cubiertos') or 0)
-        p.destacada, p.cochera, = request.form.get('destacada')=='on', request.form.get('cochera')=='on', request.form.get('pileta')=='on'
-        p.quincho, p.patio, p.terraza, p.balcon, p.sum, p.gimnasio, p.piscina= request.form.get('quincho')=='on', request.form.get('patio')=='on', request.form.get('terraza')=='on', request.form.get('balcon')=='on'
+        # CÓDIGO CORREGIDO:
+        p.destacada = request.form.get('destacada') == 'on'
+        p.cochera = request.form.get('cochera') == 'on'
+        p.piscina = request.form.get('piscina') == 'on'
+        p.quincho = request.form.get('quincho') == 'on'
+        p.patio = request.form.get('patio') == 'on'
+        p.terraza = request.form.get('terraza') == 'on'
+        p.balcon = request.form.get('balcon') == 'on'
+        p.sum = request.form.get('sum') == 'on'
+        p.gimnasio = request.form.get('gimnasio') == 'on'
         
         Propietario.query.filter_by(propiedad_id=p.id).delete()
         _procesar_datos_adicionales(request, p.id)

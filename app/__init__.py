@@ -9,6 +9,9 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object('config.Config')
     
+    # PERMITIR SUBIR ARCHIVOS (VIDEOS/IMÁGENES) DE HASTA 100 MB
+    app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
+    
     db.init_app(app)
     
     # Configuramos el LoginManager
