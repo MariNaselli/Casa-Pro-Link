@@ -14,7 +14,7 @@ def seed():
             db.session.add(admin)
 
         # 2. Poblar Tipos de Propiedad (Si no existen)
-        tipos = ["Casa", "Departamento", "Duplex", "Terreno", "Local", "Oficina"]
+        tipos = ["Casa", "Departamento", "Duplex", "Terreno", "Local", "Oficina", "Cochera"]
         for t in tipos:
             if not TipoPropiedad.query.filter_by(nombre=t).first():
                 db.session.add(TipoPropiedad(nombre=t))
