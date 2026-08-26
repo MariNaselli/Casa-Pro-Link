@@ -150,10 +150,16 @@ def editar(id):
 @app.route('/propiedad/legajo/<int:id>')
 @login_required
 def ver_legajo(id):
-    propiedad = Propiedad.query.get_or_404(id)
+    # Traemos la propiedad cargando de una sola vez sus propietarios y multimedia
+    propiedad = Propiedad.query.options(
+        joinedload(Propiedad.propietarios),
+        joinedload(Propiedad.archivos)
+    ).get_or_404(id)
+    
+    # Filtramos únicamente los archivos que son documentos/planos privados (PDFs, escrituras)
     documentos = [m for m in propiedad.archivos if m.tipo == 'documento']
+    
     return render_template('admin/legajo.html', p=propiedad, documentos=documentos)
-
 @app.route('/check-slug')
 @login_required
 def check_slug():
@@ -163,21 +169,36 @@ def check_slug():
     return {"exists": existe is not None}
 
 def _procesar_datos_adicionales(request, propiedad_id):
-    # Propietarios con EMAIL corregido
     nombres = request.form.getlist('propietario_nombre[]')
+    apellidos = request.form.getlist('propietario_apellido[]')
+    dnis = request.form.getlist('propietario_dni[]')
     tels = request.form.getlist('propietario_tel[]')
     emails = request.form.getlist('propietario_email[]')
     notas = request.form.getlist('notas_legajo[]')
-    for n, t, e, nt in zip(nombres, tels, emails, notas):
-        if n.strip():
-            db.session.add(Propietario(nombre=n, telefono=t, email=e, notas_legajo=nt, propiedad_id=propiedad_id))
+    
+    for nom, ape, d, t, e, nt in zip(nombres, apellidos, dnis, tels, emails, notas):
+        nombre_limpio = nom.strip() if nom else ''
+        apellido_limpio = ape.strip() if ape else ''
+        nombre_completo = f"{nombre_limpio} {apellido_limpio}".strip()
+        
+        if nombre_completo:
+            db.session.add(Propietario(
+                nombre=nombre_completo, 
+                dni=d.strip() if d else '', 
+                telefono=t.strip() if t else '', 
+                email=e.strip() if e else '', 
+                notas_legajo=nt.strip() if nt else '', 
+                propiedad_id=propiedad_id
+            ))
 
+    # Guardado de archivos (Fotos, Videos y PDFs/Documentos de legajo)
     mapeo = [('imagenes', 'imagen', True), ('videos', 'video', False), ('documentos', 'documento', False)]
     for input_name, tipo_db, debe_optimizar in mapeo:
         for f in request.files.getlist(input_name):
             if f and f.filename != '':
                 nombre = guardar_archivo_multimedia(f, tipo_folder='uploads', optimizar=debe_optimizar)
-                if nombre: db.session.add(Multimedia(archivo_nombre=nombre, tipo=tipo_db, propiedad_id=propiedad_id))
+                if nombre: 
+                    db.session.add(Multimedia(archivo_nombre=nombre, tipo=tipo_db, propiedad_id=propiedad_id))
 
 @app.route('/borrar_archivo/<int:id>', methods=['POST'])
 @login_required
